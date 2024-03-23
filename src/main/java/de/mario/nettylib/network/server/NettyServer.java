@@ -66,7 +66,7 @@ public class NettyServer {
                 throw new RuntimeException(e);
             }
         }
-        URLConnection.setDefaultUseCaches("tcp", false);
+//        URLConnection.setDefaultUseCaches("tcp", false);
     }
 
     public void connect(

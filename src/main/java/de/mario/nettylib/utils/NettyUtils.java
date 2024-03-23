@@ -8,6 +8,8 @@ import io.netty5.channel.epoll.EpollSocketChannel;
 import io.netty5.channel.nio.NioHandler;
 import io.netty5.channel.socket.nio.NioServerSocketChannel;
 import io.netty5.channel.socket.nio.NioSocketChannel;
+import io.netty5.util.concurrent.Future;
+import lombok.NonNull;
 
 /*
  * MIT License
@@ -44,6 +46,15 @@ public class NettyUtils {
 
     public static ChannelFactory<? extends Channel> createChannelFactory() {
         return Epoll.isAvailable() ? EpollSocketChannel::new : NioSocketChannel::new;
+    }
+
+    public static <T> void awaitFuture(@NonNull Future<T> future) {
+        try {
+            future.asStage().sync().future();
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalThreadStateException();
+        }
     }
 
 }

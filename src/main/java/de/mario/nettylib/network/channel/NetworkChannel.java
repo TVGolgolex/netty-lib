@@ -24,14 +24,19 @@ package de.mario.nettylib.network.channel;
  * SOFTWARE.
  */
 
-import de.mario.nettylib.NettyLib;
+import com.github.golgolex.eventum.EventManager;
+import de.mario.nettylib.event.NetworkChannelPacketSendEvent;
 import de.mario.nettylib.network.ChannelIdentity;
+import de.mario.nettylib.network.protocol.Packet;
+import de.mario.nettylib.utils.NettyUtils;
 import io.netty5.channel.Channel;
+import io.netty5.util.concurrent.Future;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
-import java.util.logging.Level;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 @AllArgsConstructor
@@ -43,14 +48,49 @@ public class NetworkChannel {
     @Setter
     protected boolean inactive;
 
-    public void sendPacket(Object packet) {
-        System.out.println("ccc");
-        this.channel.writeAndFlush(packet).asStage().thenAccept(unused -> {
-            NettyLib.debug(Level.INFO, this.getClass(), "Packet Sent: " + packet.getClass().getSimpleName());
-        }).exceptionally(throwable -> {
-            NettyLib.log(Level.SEVERE, this.getClass(), "Failed to send packet: " + packet.getClass().getSimpleName());
-            return null;
-        });
+    public void sendPacket(@NonNull Object... packets) {
+        for (var packet : packets) {
+            this.writePacket(packet, false);
+        }
+        this.channel.flush(); // reduces i/o load
+    }
+
+    public void sendPacketSync(@NonNull Object... packets) {
+        for (var packet : packets) {
+            var future = this.writePacket(packet, false);
+            if (future != null) {
+                NettyUtils.awaitFuture(future);
+            }
+        }
+        this.channel.flush(); // reduces i/o load
+    }
+
+    public void sendPacket(@NonNull Object packet) {
+        if (this.channel.executor().inEventLoop()) {
+            this.writePacket(packet, true);
+        } else {
+            this.channel.executor().execute(() -> this.writePacket(packet, true));
+        }
+    }
+
+    public void sendPacketSync(@NonNull Object packet) {
+        var future = this.writePacket(packet, true);
+        if (future != null) {
+            NettyUtils.awaitFuture(future);
+        }
+    }
+
+    public Packet sendQuery(@NonNull Object packet) {
+        return null;
+    }
+
+    public CompletableFuture<Packet> sendQuery(@NonNull Object packet) {
+        return null;
+    }
+
+    private Future<Void> writePacket(@NonNull Object packet, boolean flushAfter) {
+        EventManager.call(new NetworkChannelPacketSendEvent(this, packet));
+        return flushAfter ? this.channel.writeAndFlush(packet) : this.channel.write(packet);
     }
 
 }
