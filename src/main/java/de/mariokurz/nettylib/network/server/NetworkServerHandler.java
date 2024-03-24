@@ -26,6 +26,9 @@ package de.mariokurz.nettylib.network.server;
 
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthorizePacket;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingPacket;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingResult;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingResultPacket;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
@@ -45,6 +48,21 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<Object> {
         if (o instanceof NetworkChannelAuthorizePacket networkChannelAuthorizePacket) {
             serverChannelTransmitter.authorize(channelHandlerContext, networkChannelAuthorizePacket);
             return;
+        }
+
+        if (o instanceof RoutingPacket routingPacket) {
+            var networkChannel = serverChannelTransmitter.getNetworkChannel(routingPacket.receiverIdentity());
+            RoutingResultPacket routingResultPacket = new RoutingResultPacket();
+            routingResultPacket.queryId(routingPacket.queryId());
+            if (networkChannel == null) {
+                NettyLib.log(Level.SEVERE, "No NetworkChannel for {0} found.", routingPacket.receiverIdentity());
+                routingResultPacket.result(RoutingResult.FAILED_NO_CHANNEL);
+            } else {
+                NettyLib.log(Level.INFO, "Send Packet " + routingPacket.getClass().getName() + " to NetworkChannel {0}", routingPacket.receiverIdentity());
+                networkChannel.sendPacket(routingPacket);
+                routingResultPacket.result(RoutingResult.SUCCESS);
+            }
+            serverChannelTransmitter.getNetworkChannel(channelHandlerContext.channel()).sendPacket(routingResultPacket);
         }
 
         serverChannelTransmitter.dispatchPacketObject(o, channelHandlerContext);

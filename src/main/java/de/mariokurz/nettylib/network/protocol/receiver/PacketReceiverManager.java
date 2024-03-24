@@ -28,6 +28,7 @@ import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.Packet;
 import io.netty5.channel.ChannelHandlerContext;
+import lombok.NonNull;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -44,7 +45,10 @@ public class PacketReceiverManager {
      *                       It must implement the PacketReceiver interface for the corresponding packet type.
      * @param <P>            The type parameter representing the packet.
      */
-    public <P extends Packet> void registerPacketHandler(Class<? extends Packet> packet, Class<? extends PacketReceiver<P>> packetReceiver) {
+    public <P extends Packet> void registerPacketHandler(
+            @NonNull Class<? extends Packet> packet,
+            @NonNull Class<? extends PacketReceiver<P>> packetReceiver
+    ) {
         // Check if there is already a list of packet receivers registered for this packet type
         if (!this.packetReceivers.containsKey(packet)) {
             // If not, create a new list
@@ -55,27 +59,30 @@ public class PacketReceiverManager {
     }
 
     /**
-     * Unregisters a packet handler for a specific type of packet.
+     * Unregisters a packet packetReceiver for a specific type of packet.
      *
      * @param packet The class object representing the type of packet to handle.
-     * @param handler The class object representing the packet receiver to unregister.
+     * @param packetReceiver The class object representing the packet receiver to unregister.
      * @param <P>    The type parameter representing the packet.
-     * @return       True if the packet handler is successfully unregistered, false otherwise.
+     * @return       True if the packet packetReceiver is successfully unregistered, false otherwise.
      */
-    public <P extends Packet> boolean unregisterPacketHandler(Class<? extends Packet> packet, Class<? extends PacketReceiver<P>> handler) {
+    public <P extends Packet> boolean unregisterPacketHandler(
+            @NonNull Class<? extends Packet> packet,
+            @NonNull Class<? extends PacketReceiver<P>> packetReceiver
+    ) {
         // Check if there are packet handlers registered for this packet type
         if (!this.packetReceivers.containsKey(packet)) {
             return false; // No handlers registered for this packet type
         }
         // Retrieve the list of packet handlers for this packet type
         Collection<Class<? extends PacketReceiver<?>>> handlers = this.packetReceivers.get(packet);
-        // Remove the specified packet handler from the list
-        handlers.remove(handler);
+        // Remove the specified packet packetReceiver from the list
+        handlers.remove(packetReceiver);
         // If there are no more packet handlers registered for this packet type, remove the packet type entry
         if (handlers.isEmpty()) {
             this.packetReceivers.remove(packet);
         }
-        return true; // Successfully unregistered the packet handler
+        return true; // Successfully unregistered the packet packetReceiver
     }
 
     /**
@@ -85,7 +92,9 @@ public class PacketReceiverManager {
      * @param <P>    The type parameter representing the packet.
      * @return       A collection of packet receivers for the specified packet type.
      */
-    public <P extends Packet> Collection<PacketReceiver<P>> getReceivers(P packet) {
+    public <P extends Packet> Collection<PacketReceiver<P>> getReceivers(
+            @NonNull P packet
+    ) {
         // Create a new collection to store the packet receivers
         Collection<PacketReceiver<P>> handlers = new LinkedList<>();
         // Check if there are packet receivers registered for the class of the given packet
@@ -113,7 +122,11 @@ public class PacketReceiverManager {
      * @param <P>                The type parameter representing the packet.
      * @return                   The number of packet receivers that were called.
      */
-    public <P extends Packet> int dispatch(P packet, NetworkChannel networkChannel, ChannelHandlerContext channelHandlerContext) {
+    public <P extends Packet> int dispatch(
+            @NonNull P packet,
+            @NonNull NetworkChannel networkChannel,
+            @NonNull ChannelHandlerContext channelHandlerContext
+    ) {
         var calledCount = 0; // Initialize the count of called packet receivers
         // Iterate through each packet receiver registered for the packet type
         for (var listener : this.getReceivers(packet)) {

@@ -24,9 +24,12 @@ package de.mariokurz.nettylib.network.channel;
  * SOFTWARE.
  */
 
+import de.mariokurz.nettylib.network.ChannelIdentity;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
+import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -39,7 +42,7 @@ public interface ChannelTransmitter {
      * @param packet The packet to send.
      * @param ifNot  Predicate specifying which network channels should be excluded from receiving the packet.
      */
-    void sendPacketToAll(Object packet, Predicate<NetworkChannel> ifNot);
+    void sendPacketToAll(@NonNull Object packet, @Nullable  Predicate<NetworkChannel> ifNot);
 
     /**
      * Retrieves a collection of all network channels that are authorized.
@@ -54,7 +57,7 @@ public interface ChannelTransmitter {
      * @param channel The channel object to look up.
      * @return The associated network channel, or null if not found.
      */
-    NetworkChannel getNetworkChannel(Channel channel);
+    NetworkChannel getNetworkChannel(@NonNull Channel channel);
 
     /**
      * Retrieves the network channel associated with the given namespace.
@@ -62,7 +65,7 @@ public interface ChannelTransmitter {
      * @param namespace The namespace to look up.
      * @return The associated network channel, or null if not found.
      */
-    NetworkChannel getNetworkChannel(String namespace);
+    NetworkChannel getNetworkChannel(@NonNull String namespace);
 
     /**
      * Retrieves the network channel associated with the given unique ID.
@@ -70,7 +73,15 @@ public interface ChannelTransmitter {
      * @param uniqueId The unique ID to look up.
      * @return The associated network channel, or null if not found.
      */
-    NetworkChannel getNetworkChannel(UUID uniqueId);
+    NetworkChannel getNetworkChannel(@NonNull UUID uniqueId);
+
+    /**
+     * Retrieves the network channel associated with the given channel identity.
+     *
+     * @param channelIdentity The identity of the channel.
+     * @return The associated network channel, or null if not found.
+     */
+    NetworkChannel getNetworkChannel(@NonNull ChannelIdentity channelIdentity);
 
     /**
      * Dispatches a packet object to the appropriate handlers.
@@ -78,6 +89,6 @@ public interface ChannelTransmitter {
      * @param packetObj           The packet object to dispatch.
      * @param channelHandlerContext The channel handler context associated with the packet object.
      */
-    void dispatchPacketObject(Object packetObj, ChannelHandlerContext channelHandlerContext);
+    void dispatchPacketObject(@NonNull Object packetObj, @NonNull ChannelHandlerContext channelHandlerContext);
 
 }

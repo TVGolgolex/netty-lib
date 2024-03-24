@@ -1,9 +1,9 @@
-package de.mariokurz.nettylib.test;
+package de.mariokurz.nettylib.network.protocol.routing;
 
 /*
  * MIT License
  *
- * Copyright (c) 2024 23:28 Mario Pascal K.
+ * Copyright (c) 2024 21:18 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,33 +24,13 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
-import de.mariokurz.nettylib.NettyLib;
-import de.mariokurz.nettylib.network.ChannelIdentity;
-import de.mariokurz.nettylib.network.client.InactiveAction;
-import de.mariokurz.nettylib.network.client.NetworkClient;
-import de.mariokurz.nettylib.test.packet.TestPacket;
-import de.mariokurz.nettylib.test.packet.TestRoutingPacket;
-import de.mariokurz.nettylib.test.receiver.TestPacketReceiver;
-import de.mariokurz.nettylib.test.receiver.TestRoutingReceiver;
+import de.mariokurz.nettylib.network.protocol.Packet;
+import lombok.Data;
 
-import java.util.UUID;
+import java.io.Serializable;
 
-public class Client2 {
-    public static void main(String[] args) {
-
-        NettyLib.DEV_MODE = true;
-
-        var client = new NetworkClient(
-                new ChannelIdentity(
-                        "Test-2",
-                        UUID.randomUUID()
-                ),
-                InactiveAction.SHUTDOWN,
-                false);
-
-        client.connect("0.0.0.0", 9985);
-
-        client.packetReceiverManager().registerPacketHandler(TestRoutingPacket.class, TestRoutingReceiver.class);
-
-    }
+@Data
+public class RoutingResultPacket extends Packet
+        implements Serializable {
+    private RoutingResult result;
 }

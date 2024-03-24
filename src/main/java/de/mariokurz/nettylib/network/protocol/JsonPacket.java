@@ -1,9 +1,9 @@
-package de.mariokurz.nettylib.test;
+package de.mariokurz.nettylib.network.protocol;
 
 /*
  * MIT License
  *
- * Copyright (c) 2024 23:28 Mario Pascal K.
+ * Copyright (c) 2024 22:14 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,33 +24,32 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
+import com.google.gson.JsonObject;
+import de.golgolex.quala.json.JsonUtils;
+import de.golgolex.quala.json.document.JsonDocument;
 import de.mariokurz.nettylib.NettyLib;
-import de.mariokurz.nettylib.network.ChannelIdentity;
-import de.mariokurz.nettylib.network.client.InactiveAction;
-import de.mariokurz.nettylib.network.client.NetworkClient;
-import de.mariokurz.nettylib.test.packet.TestPacket;
-import de.mariokurz.nettylib.test.packet.TestRoutingPacket;
-import de.mariokurz.nettylib.test.receiver.TestPacketReceiver;
-import de.mariokurz.nettylib.test.receiver.TestRoutingReceiver;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingPacket;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-import java.util.UUID;
+import java.io.Serializable;
+import java.util.logging.Level;
 
-public class Client2 {
-    public static void main(String[] args) {
+@Getter
+@AllArgsConstructor
+public class JsonPacket extends RoutingPacket implements Serializable {
 
-        NettyLib.DEV_MODE = true;
+    private final String json;
 
-        var client = new NetworkClient(
-                new ChannelIdentity(
-                        "Test-2",
-                        UUID.randomUUID()
-                ),
-                InactiveAction.SHUTDOWN,
-                false);
+    public JsonPacket(JsonDocument jsonDocument) {
+        this.json = JsonUtils.toJson(jsonDocument.jsonObject());
+    }
 
-        client.connect("0.0.0.0", 9985);
-
-        client.packetReceiverManager().registerPacketHandler(TestRoutingPacket.class, TestRoutingReceiver.class);
-
+    public JsonDocument jsonDocument() {
+        if (this.json == null) {
+            NettyLib.log(Level.SEVERE, this.getClass(), "No Json string provided");
+            return new JsonDocument();
+        }
+        return new JsonDocument(JsonUtils.fromJson(this.json, JsonObject.class));
     }
 }

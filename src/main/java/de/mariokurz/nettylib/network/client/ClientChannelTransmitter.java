@@ -29,11 +29,12 @@ import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.channel.ChannelTransmitter;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.Packet;
-import de.mariokurz.nettylib.utils.NettyUtils;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,10 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
      * @param ifNot  Predicate specifying which network channels should be excluded from receiving the packet.
      */
     @Override
-    public void sendPacketToAll(Object packet, Predicate<NetworkChannel> ifNot) {
+    public void sendPacketToAll(
+            @NonNull Object packet,
+            @Nullable Predicate<NetworkChannel> ifNot
+    ) {
         networkChannels.forEach((uuid, networkChannel) -> {
             if (ifNot != null && !ifNot.test(networkChannel) || networkChannel.inactive()) {
                 return;
@@ -80,7 +84,9 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
      * @return The associated network channel, or null if not found.
      */
     @Override
-    public NetworkChannel getNetworkChannel(Channel channel) {
+    public NetworkChannel getNetworkChannel(
+            @NonNull Channel channel
+    ) {
         for (var value : networkChannels.values()) {
             if (value.channel().remoteAddress().equals(channel.remoteAddress())) {
                 return value;
@@ -96,7 +102,9 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
      * @return The associated network channel, or null if not found.
      */
     @Override
-    public NetworkChannel getNetworkChannel(String namespace) {
+    public NetworkChannel getNetworkChannel(
+            @NonNull String namespace
+    ) {
         for (var value : networkChannels.values()) {
             if (value.channelIdentity().namespace().equalsIgnoreCase(namespace)) {
                 return value;
@@ -112,7 +120,9 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
      * @return The associated network channel, or null if not found.
      */
     @Override
-    public NetworkChannel getNetworkChannel(UUID uniqueId) {
+    public NetworkChannel getNetworkChannel(
+            @NonNull UUID uniqueId
+    ) {
         for (var value : networkChannels.values()) {
             if (value.channelIdentity().uniqueId().equals(uniqueId)) {
                 return value;
@@ -122,15 +132,40 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
     }
 
     /**
+     * Retrieves the network channel associated with the given channel identity.
+     *
+     * @param channelIdentity The identity of the channel.
+     * @return The associated network channel, or null if not found.
+     */
+    @Override
+    public NetworkChannel getNetworkChannel(
+            @NonNull ChannelIdentity channelIdentity
+    ) {
+        // Iterate through each authorized entry
+        for (var value : networkChannels.values()) {
+            // Check if the channelIdentity matches
+            if (value.channelIdentity().equals(channelIdentity)) {
+                // Return the associated network channel
+                return value;
+            }
+        }
+        return null; // Network channel not found
+    }
+
+    /**
      * Dispatches a packet object to the appropriate handlers.
      *
      * @param packetObj           The packet object to dispatch.
      * @param channelHandlerContext The channel handler context associated with the packet object.
      */
     @Override
-    public void dispatchPacketObject(Object packetObj, ChannelHandlerContext channelHandlerContext) {
+    public void dispatchPacketObject(
+            @NonNull Object packetObj,
+            @NonNull ChannelHandlerContext channelHandlerContext
+    ) {
         if (packetObj instanceof Packet packet) {
             var networkChannel = this.getNetworkChannel(channelHandlerContext.channel());
+            this.networkClient.routingPacketManager.dispatch(packet);
             this.networkClient.queryPacketManager.dispatch(packet);
             this.networkClient.packetReceiverManager.dispatch(packet, networkChannel, channelHandlerContext);
         }
@@ -142,11 +177,15 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
      * @param channelIdentity      The identity of the channel.
      * @param channelHandlerContext The context of the channel.
      */
-    public void createNetworkChannel(ChannelIdentity channelIdentity, ChannelHandlerContext channelHandlerContext) {
+    public void createNetworkChannel(
+            @NonNull ChannelIdentity channelIdentity,
+            @NonNull ChannelHandlerContext channelHandlerContext
+    ) {
         // Creates a new network channel with the specified parameters
         networkChannels.put(channelIdentity.uniqueId(), new NetworkChannel(
                 channelIdentity,
                 networkClient.queryPacketManager,
+                networkClient.routingPacketManager,
                 channelHandlerContext.channel(),
                 false
         ));
@@ -159,7 +198,9 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
      *
      * @param channelHandlerContext The context of the channel to be removed.
      */
-    public void removeNetworkChannel(ChannelHandlerContext channelHandlerContext) {
+    public void removeNetworkChannel(
+            @NonNull ChannelHandlerContext channelHandlerContext
+    ) {
         // Retrieves the network channel associated with the given context
         var networkChannel = this.getNetworkChannel(channelHandlerContext.channel());
         // Checks if a network channel was found

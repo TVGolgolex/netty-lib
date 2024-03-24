@@ -30,6 +30,7 @@ import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.Packet;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.Map;
 import java.util.UUID;
@@ -52,7 +53,10 @@ public class QueryPacketManager {
      * @return                A CompletableFuture that will be completed with the response packet,
      *                        or null if no response is received within the specified time limit.
      */
-    public <T extends Packet> CompletableFuture<T> sendQueryFuture(Object packet, NetworkChannel networkChannel) {
+    public <T extends Packet> CompletableFuture<T> sendQueryFuture(
+            @NonNull Object packet,
+            @NonNull NetworkChannel networkChannel
+    ) {
         // Check if the provided packet is a valid Packet instance
         if (!(packet instanceof Packet packetObj)) {
             // Log an information message if the packet is not valid
@@ -107,7 +111,10 @@ public class QueryPacketManager {
      * @return                The response packet, or null if no response is received within
      *                        the specified time limit.
      */
-    public <T extends Packet> T sendQuery(Object packet, NetworkChannel networkChannel) {
+    public <T extends Packet> T sendQuery(
+            @NonNull Object packet,
+            @NonNull NetworkChannel networkChannel
+    ) {
         // Check if the provided packet is a valid Packet instance
         if (!(packet instanceof Packet packetObj)) {
             // Log an information message if the packet is not valid
@@ -148,6 +155,8 @@ public class QueryPacketManager {
 
         // Retrieve the result from waitingHandlers based on the query ID
         var result = waitingHandlers.get(queryUniqueId);
+        // Remove the entry from waitingHandlers as the response has been received
+        waitingHandlers.remove(queryUniqueId);
         // Check if the result is null or the packet in the result is null
         if (result == null || result.value() == null || result.value().packet() == null) {
             // Return null if the result is null
@@ -169,18 +178,15 @@ public class QueryPacketManager {
      *
      * @param packet The packet to be dispatched.
      */
-    public void dispatch(Packet packet) {
+    public void dispatch(
+            @NonNull Packet packet
+    ) {
         // Check if the packet contains a query ID and if there's a waiting handler for it
         NettyLib.debug(Level.INFO, this.getClass(), "Checken Packet: " + packet.queryId() + "/" + packet.getClass().getSimpleName());
-
-        for (Map.Entry<UUID, Value<QueryResult>> uuidValueEntry : this.waitingHandlers.entrySet()) {
-            System.out.println(uuidValueEntry.getKey().toString());
-        }
-
-        if (packet.queryId() != null && this.waitingHandlers.containsKey(packet.queryId())) {
+        if (packet.queryId() != null && waitingHandlers.containsKey(packet.queryId())) {
             NettyLib.debug(Level.INFO, this.getClass(), "Processing Query: " + packet.queryId() + "/" + packet.getClass().getSimpleName());
             // Retrieve the waiting handler associated with the packet's query ID
-            var waitingHandler = this.waitingHandlers.get(packet.queryId());
+            var waitingHandler = waitingHandlers.get(packet.queryId());
             // Create a QueryResult object containing the query ID and the received packet
             NettyLib.debug(Level.INFO, this.getClass(), "Setting Value of Query to: " + packet.queryId() + "/" + packet.getClass().getSimpleName());
             var queryResult = new QueryResult(packet.queryId(), packet);

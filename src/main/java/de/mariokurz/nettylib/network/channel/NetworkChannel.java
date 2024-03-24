@@ -30,6 +30,8 @@ import de.mariokurz.nettylib.event.NetworkChannelPacketSendEvent;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.protocol.Packet;
 import de.mariokurz.nettylib.network.protocol.query.QueryPacketManager;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingPacketManager;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingResult;
 import de.mariokurz.nettylib.utils.NettyUtils;
 import io.netty5.channel.Channel;
 import io.netty5.util.concurrent.Future;
@@ -47,6 +49,7 @@ public class NetworkChannel {
 
     protected final ChannelIdentity channelIdentity;
     protected final QueryPacketManager queryPacketManager;
+    protected final RoutingPacketManager routingPacketManager;
     @Setter
     protected Channel channel;
     @Setter
@@ -57,7 +60,9 @@ public class NetworkChannel {
      *
      * @param packets The packets to be sent.
      */
-    public void sendPacket(@NonNull Object... packets) {
+    public void sendPacket(
+            @NonNull Object... packets
+    ) {
         // Iterate through each packet in the packets array
         for (var packet : packets) {
             // Write the packet to the channel without waiting for completion
@@ -72,7 +77,9 @@ public class NetworkChannel {
      *
      * @param packets The packets to be sent.
      */
-    public void sendPacketSync(@NonNull Object... packets) {
+    public void sendPacketSync(
+            @NonNull Object... packets
+    ) {
         // Iterate through each packet in the packets array
         for (var packet : packets) {
             // Write the packet to the channel and wait for its completion
@@ -90,7 +97,9 @@ public class NetworkChannel {
      *
      * @param packet The packet to be sent.
      */
-    public void sendPacket(@NonNull Object packet) {
+    public void sendPacket(
+            @NonNull Object packet
+    ) {
         // Check if the current thread is in the event loop
         if (this.channel.executor().inEventLoop()) {
             // If yes, write the packet to the channel directly
@@ -106,7 +115,9 @@ public class NetworkChannel {
      *
      * @param packet The packet to be sent.
      */
-    public void sendPacketSync(@NonNull Object packet) {
+    public void sendPacketSync(
+            @NonNull Object packet
+    ) {
         // Write the packet to the channel and wait for its completion
         var future = this.writePacket(packet, true);
         if (future != null) {
@@ -120,7 +131,9 @@ public class NetworkChannel {
      * @param packet The query packet to be sent.
      * @return A CompletableFuture representing the response packet.
      */
-    public <T extends Packet> T sendQuery(@NonNull Object packet) {
+    public <T extends Packet> T sendQuery(
+            @NonNull Object packet
+    ) {
         // Delegate sending the query packet to the query packet manager
         return this.queryPacketManager.sendQuery(packet, this);
     }
@@ -131,10 +144,43 @@ public class NetworkChannel {
      * @param packet The query packet to be sent.
      * @return A CompletableFuture representing the response packet.
      */
-    public <T extends Packet> CompletableFuture<T> sendQueryFuture(@NonNull Object packet) {
+    public <T extends Packet> CompletableFuture<T> sendQueryFuture(
+            @NonNull Object packet
+    ) {
         // Delegate sending the query packet to the query packet manager
         return this.queryPacketManager.sendQueryFuture(packet, this);
     }
+
+    /**
+     * Sends a packet to a specified receiver and waits for a routing result synchronously.
+     *
+     * @param packet           The packet to send.
+     * @param receiverIdentity The identity of the receiver.
+     * @return The routing result.
+     */
+    public RoutingResult sendRoutedPacket(
+            @NonNull Object packet,
+            @NonNull ChannelIdentity receiverIdentity
+    ) {
+        // Delegate the task to the routing packet manager
+        return this.routingPacketManager.sendRoutedPacket(packet, this, receiverIdentity);
+    }
+
+    /**
+     * Sends a packet to a specified receiver and waits for a routing result asynchronously.
+     *
+     * @param packet           The packet to send.
+     * @param receiverIdentity The identity of the receiver.
+     * @return A CompletableFuture containing the routing result.
+     */
+    public CompletableFuture<RoutingResult> sendRoutedPacketFuture(
+            @NonNull Object packet,
+            @NonNull ChannelIdentity receiverIdentity
+    ) {
+        // Delegate the task to the routing packet manager
+        return this.routingPacketManager.sendRoutedPacketFuture(packet, this, receiverIdentity);
+    }
+
 
     /**
      * Writes a packet to the network channel and optionally flushes the channel.
@@ -143,7 +189,10 @@ public class NetworkChannel {
      * @param flushAfter  Indicates whether to flush the channel after writing the packet.
      * @return A Future representing the result of the write operation.
      */
-    private Future<Void> writePacket(@NonNull Object packet, boolean flushAfter) {
+    private Future<Void> writePacket(
+            @NonNull Object packet,
+            boolean flushAfter
+    ) {
         // Trigger a packet send event before writing the packet to the channel
         EventManager.call(new NetworkChannelPacketSendEvent(this, packet));
         // Debug

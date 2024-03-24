@@ -25,11 +25,14 @@ package de.mariokurz.nettylib.network.client;
  */
 
 import de.golgolex.quala.ConsoleColor;
+import de.golgolex.quala.scheduler.Scheduler;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
+import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelStayActivePacket;
 import de.mariokurz.nettylib.network.protocol.query.QueryPacketManager;
 import de.mariokurz.nettylib.network.protocol.receiver.PacketReceiverManager;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingPacketManager;
 import de.mariokurz.nettylib.utils.NettyUtils;
 import io.netty5.bootstrap.Bootstrap;
 import io.netty5.channel.Channel;
@@ -51,6 +54,7 @@ public class NetworkClient implements AutoCloseable{
 
     protected final EventLoopGroup eventLoopGroup = new MultithreadEventLoopGroup(2, NettyUtils.createIoHandlerFactory());
     protected final QueryPacketManager queryPacketManager = new QueryPacketManager();
+    protected final RoutingPacketManager routingPacketManager = new RoutingPacketManager();
     protected final PacketReceiverManager packetReceiverManager = new PacketReceiverManager();
     protected final ClientChannelTransmitter clientChannelTransmitter;
     protected final ChannelIdentity channelIdentity;
@@ -70,7 +74,8 @@ public class NetworkClient implements AutoCloseable{
         this.inactiveAction = inactiveAction;
         this.networkChannel = new NetworkChannel(
                 this.channelIdentity,
-                new QueryPacketManager(),
+                this.queryPacketManager,
+                this.routingPacketManager,
                 null,
                 false
         );
@@ -120,6 +125,10 @@ public class NetworkClient implements AutoCloseable{
                 throw new RuntimeException(e);
             }
         }));
+    }
+
+    public void enableStayActive() {
+        Scheduler.runtimeScheduler().schedule(() -> this.networkChannel.sendPacket(new NetworkChannelStayActivePacket(this.channelIdentity)), 60000, 60000);
     }
 
     @Override

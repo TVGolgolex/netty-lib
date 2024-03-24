@@ -24,14 +24,16 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
-import de.golgolex.quala.json.document.JsonDocument;
+import de.golgolex.quala.Quala;
 import de.golgolex.quala.scheduler.Scheduler;
+import de.golgolex.quala.utils.string.StringUtils;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.client.InactiveAction;
 import de.mariokurz.nettylib.network.client.NetworkClient;
-import de.mariokurz.nettylib.test.packet.TestPacket;
+import de.mariokurz.nettylib.test.packet.TestRoutingPacket;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class Client {
@@ -49,14 +51,25 @@ public class Client {
 
         client.connect("0.0.0.0", 9985);
 
-        Scheduler.runtimeScheduler().schedule(() -> {
-            /*client.networkChannel().sendPacket(new TestPacket("Hallo"*//*, new JsonDocument("Test", "Test")*//*));
-            System.out.println("test");*/
+/*        Scheduler.runtimeScheduler().schedule(() -> {
+            *//*client.networkChannel().sendPacket(new TestPacket("Hallo"*//**//*, new JsonDocument("Test", "Test")*//**//*));
+            System.out.println("test");*//*
 
-            TestPacket result = client.networkChannel().sendQuery(new TestPacket("Test"));
-            System.out.println(result.message());
+*//*            TestPacket result = client.networkChannel().sendQuery(new TestPacket("Test"));
+            System.out.println(result.message());*//*
 
-        }, 2000);
+            TestRoutingPacket testRoutingPacket = new TestRoutingPacket(StringUtils.generateRandomString(8),
+                    UUID.randomUUID(), new ArrayList<>());
+
+            for (int i = 0; i < 25; i++) {
+                testRoutingPacket.strings().add(StringUtils.generateRandomString(Quala.randomNumber(3, 15)));
+            }
+
+            var result = client.networkChannel().sendRoutedPacket(testRoutingPacket,
+                    client.clientChannelTransmitter().getNetworkChannel("Test-2").channelIdentity());
+            System.out.println(result.name());
+
+        }, 4000);*/
 
     }
 }

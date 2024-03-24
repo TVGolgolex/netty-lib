@@ -3,7 +3,7 @@ package de.mariokurz.nettylib.network.protocol.routing;
 /*
  * MIT License
  *
- * Copyright (c) 2024 21:03 Mario Pascal K.
+ * Copyright (c) 2024 21:15 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,10 @@ package de.mariokurz.nettylib.network.protocol.routing;
  * SOFTWARE.
  */
 
-public class PacketRoutingManager {
-
-
-
+public enum RoutingResult {
+    FAILED_UNKNOWN,
+    FAILED_NO_CHANNEL,
+    SUCCESS,
+    NO_RESULT,
+    IDLE
 }

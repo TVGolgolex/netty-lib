@@ -26,17 +26,22 @@ package de.mariokurz.nettylib.network.server;
 
 import de.golgolex.quala.utils.data.Pair;
 import de.mariokurz.nettylib.NettyLib;
+import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.channel.ChannelTransmitter;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.Packet;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthenticatedPacket;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthorizePacket;
+import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInactivePacket;
+import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInitPacket;
 import de.mariokurz.nettylib.network.protocol.query.QueryPacketManager;
 import de.mariokurz.nettylib.network.protocol.receiver.PacketReceiverManager;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
 import lombok.Getter;
+import lombok.NonNull;
 
+import javax.annotation.Nullable;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,7 +65,10 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      * @param ifNot  Predicate specifying which network channels should be excluded from receiving the packet.
      */
     @Override
-    public void sendPacketToAll(Object packet, Predicate<NetworkChannel> ifNot) {
+    public void sendPacketToAll(
+            @NonNull Object packet,
+            @Nullable Predicate<NetworkChannel> ifNot
+    ) {
         // Iterate over each authorized network channel
         authorized.forEach((uuid, networkChannelLongPair) -> {
             // Check if a predicate is provided and the network channel does not match the predicate,
@@ -93,7 +101,9 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      * @return The associated network channel, or null if not found.
      */
     @Override
-    public NetworkChannel getNetworkChannel(Channel channel) {
+    public NetworkChannel getNetworkChannel(
+            @NonNull Channel channel
+    ) {
         // Iterate through each authorized entry
         for (var value : authorized.values()) {
             // Check if the remote address of the channel matches
@@ -112,7 +122,9 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      * @return The associated network channel, or null if not found.
      */
     @Override
-    public NetworkChannel getNetworkChannel(String namespace) {
+    public NetworkChannel getNetworkChannel(
+            @NonNull String namespace
+    ) {
         // Iterate through each authorized entry
         for (var value : authorized.values()) {
             // Check if the namespace matches
@@ -131,11 +143,34 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      * @return The associated network channel, or null if not found.
      */
     @Override
-    public NetworkChannel getNetworkChannel(UUID uniqueId) {
+    public NetworkChannel getNetworkChannel(
+            @NonNull UUID uniqueId
+    ) {
         // Iterate through each authorized entry
         for (var value : authorized.values()) {
             // Check if the unique ID matches
             if (value.first().channelIdentity().uniqueId().equals(uniqueId)) {
+                // Return the associated network channel
+                return value.first();
+            }
+        }
+        return null; // Network channel not found
+    }
+
+    /**
+     * Retrieves the network channel associated with the given channel identity.
+     *
+     * @param channelIdentity The identity of the channel.
+     * @return The associated network channel, or null if not found.
+     */
+    @Override
+    public NetworkChannel getNetworkChannel(
+            @NonNull ChannelIdentity channelIdentity
+    ) {
+        // Iterate through each authorized entry
+        for (var value : authorized.values()) {
+            // Check if the channelIdentity matches
+            if (value.first().channelIdentity().equals(channelIdentity)) {
                 // Return the associated network channel
                 return value.first();
             }
@@ -150,7 +185,10 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      * @param channelHandlerContext The channel handler context associated with the packet object.
      */
     @Override
-    public void dispatchPacketObject(Object packetObj, ChannelHandlerContext channelHandlerContext) {
+    public void dispatchPacketObject(
+            @NonNull Object packetObj,
+            @NonNull ChannelHandlerContext channelHandlerContext
+    ) {
         // Check if the packet object is an instance of Packet
         if (packetObj instanceof Packet packet) {
             // Retrieve the network channel associated with the channel handler context
@@ -166,7 +204,9 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      *
      * @param ctx The channel handler context associated with the active network channel.
      */
-    public void active(ChannelHandlerContext ctx) {
+    public void active(
+            @NonNull ChannelHandlerContext ctx
+    ) {
         // Iterate through each authorized entry
         for (Pair<NetworkChannel, Long> value : authorized.values()) {
             // Check if the remote address of the network channel matches
@@ -185,13 +225,15 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      *
      * @param ctx The channel handler context associated with the inactive network channel.
      */
-    public void inactive(ChannelHandlerContext ctx) {
+    public void inactive(
+            @NonNull ChannelHandlerContext ctx
+    ) {
         // Iterate through each authorized entry
         for (Pair<NetworkChannel, Long> value : authorized.values()) {
             // Check if the remote address of the network channel matches
             if (value.first().channel().remoteAddress().equals(ctx.channel().remoteAddress())) {
                 // Send a packet to all network channels indicating the channel is no longer authenticated
-                sendPacketToAll(new NetworkChannelAuthenticatedPacket(value.first().channelIdentity()), null);
+                sendPacketToAll(new NetworkChannelInactivePacket(value.first().channelIdentity()), null);
                 // Set the network channel as inactive
                 value.first().inactive(true);
                 break;
@@ -205,25 +247,34 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
      * @param ctx                        The channel handler context associated with the network channel.
      * @param networkChannelAuthorizePacket The authorization packet containing the channel identity.
      */
-    public void authorize(ChannelHandlerContext ctx, NetworkChannelAuthorizePacket networkChannelAuthorizePacket) {
-        // Check if the network channel is not found in the unauthorized map
+    public void authorize(
+            @NonNull ChannelHandlerContext ctx,
+            @NonNull NetworkChannelAuthorizePacket networkChannelAuthorizePacket
+    ) {
+        // Check if the channel is not marked as waiting for authorization
         if (!unauthorized.containsKey(ctx.channel().remoteAddress())) {
-            // Log an error if the channel is not marked as waiting for authorization
+            // Log a severe error if the channel is not marked as waiting for authorization
             NettyLib.log(Level.SEVERE, this.getClass(), "Channel: " + ctx.channel().remoteAddress() + " is not marked: Waiting for authorization");
             return;
         }
+        // Create a new network channel with the provided channel identity and context
+        var networkChannel = new NetworkChannel(
+                networkChannelAuthorizePacket.channelIdentity(),
+                queryPacketManager,
+                null, // null argument to be filled later
+                ctx.channel(),
+                false
+        );
+        // Send an authentication packet to all network channels
+        sendPacketToAll(new NetworkChannelAuthenticatedPacket(networkChannelAuthorizePacket.channelIdentity()), null);
+        // Send a network channel initialization packet to the newly authorized network channel
+        networkChannel.sendPacket(new NetworkChannelInitPacket(this.getNetworkChannels().stream()
+                .map(NetworkChannel::channelIdentity)
+                .toList()));
         // Add the authorized network channel to the authorized map
-        authorized.put(networkChannelAuthorizePacket.channelIdentity().uniqueId(), new Pair<>(
-                new NetworkChannel(
-                        networkChannelAuthorizePacket.channelIdentity(),
-                        queryPacketManager,
-                        ctx.channel(),
-                        false
-                ),
+        authorized.put(networkChannelAuthorizePacket.channelIdentity().uniqueId(), new Pair<>(networkChannel,
                 System.currentTimeMillis()
         ));
-        // Send a packet to all network channels indicating the channel is authenticated
-        sendPacketToAll(new NetworkChannelAuthenticatedPacket(networkChannelAuthorizePacket.channelIdentity()), null);
         // Log the successful authorization of the network channel
         NettyLib.debug(Level.INFO, this.getClass(), "Authorized Channel: "
                 + ctx.channel().remoteAddress() + " - "

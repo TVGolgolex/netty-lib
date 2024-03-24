@@ -28,6 +28,8 @@ import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthenticatedPacket;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthorizePacket;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInactivePacket;
+import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInitPacket;
+import de.mariokurz.nettylib.network.protocol.routing.RoutingResultPacket;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.SimpleChannelInboundHandler;
 import lombok.AllArgsConstructor;
@@ -50,6 +52,19 @@ public class NetworkClientHandler extends SimpleChannelInboundHandler<Object> {
 
         if (o instanceof NetworkChannelInactivePacket) {
             networkClient.clientChannelTransmitter.removeNetworkChannel(channelHandlerContext);
+        }
+
+        if (o instanceof NetworkChannelInitPacket packet) {
+            for (var channelIdentity : packet.connectedChannel()) {
+                if (channelIdentity != null) {
+                    networkClient.clientChannelTransmitter.createNetworkChannel(channelIdentity, channelHandlerContext);
+                }
+            }
+        }
+
+        if (o instanceof RoutingResultPacket routingResultPacket) {
+            networkClient.routingPacketManager.dispatch(routingResultPacket);
+            return;
         }
 
         networkClient.clientChannelTransmitter.dispatchPacketObject(o, channelHandlerContext);
