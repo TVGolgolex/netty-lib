@@ -1,9 +1,9 @@
-package de.mariokurz.nettylib.test;
+package de.mariokurz.nettylib.test.packet;
 
 /*
  * MIT License
  *
- * Copyright (c) 2024 23:20 Mario Pascal K.
+ * Copyright (c) 2024 22:41 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,24 +24,7 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
-import de.mariokurz.nettylib.NettyLib;
-import de.mariokurz.nettylib.network.server.NetworkServer;
-import de.mariokurz.nettylib.test.packet.ServerPacket;
-import de.mariokurz.nettylib.test.packet.TestPacket;
-import de.mariokurz.nettylib.test.receiver.ServerPacketReceiver;
-import de.mariokurz.nettylib.test.receiver.TestPacketReceiver;
+import java.io.Serializable;
 
-public class Server {
-    public static void main(String[] args) {
-
-        NettyLib.DEV_MODE = true;
-
-        var server = new NetworkServer(false);
-
-        server.connect("0.0.0.0", 9985);
-
-        server.serverChannelTransmitter().packetReceiverManager().registerPacketHandler(TestPacket.class, TestPacketReceiver.class);
-        server.serverChannelTransmitter().packetReceiverManager().registerPacketHandler(ServerPacket.class, ServerPacketReceiver.class);
-
-    }
+public class Proxy extends AbstractServer implements Serializable {
 }

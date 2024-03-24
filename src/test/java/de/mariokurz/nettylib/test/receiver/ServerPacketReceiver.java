@@ -1,9 +1,9 @@
-package de.mariokurz.nettylib.test;
+package de.mariokurz.nettylib.test.receiver;
 
 /*
  * MIT License
  *
- * Copyright (c) 2024 23:20 Mario Pascal K.
+ * Copyright (c) 2024 22:43 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,24 +24,14 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
-import de.mariokurz.nettylib.NettyLib;
-import de.mariokurz.nettylib.network.server.NetworkServer;
+import de.golgolex.quala.json.JsonUtils;
+import de.mariokurz.nettylib.network.channel.NetworkChannel;
+import de.mariokurz.nettylib.network.protocol.receiver.PacketReceiver;
 import de.mariokurz.nettylib.test.packet.ServerPacket;
-import de.mariokurz.nettylib.test.packet.TestPacket;
-import de.mariokurz.nettylib.test.receiver.ServerPacketReceiver;
-import de.mariokurz.nettylib.test.receiver.TestPacketReceiver;
 
-public class Server {
-    public static void main(String[] args) {
-
-        NettyLib.DEV_MODE = true;
-
-        var server = new NetworkServer(false);
-
-        server.connect("0.0.0.0", 9985);
-
-        server.serverChannelTransmitter().packetReceiverManager().registerPacketHandler(TestPacket.class, TestPacketReceiver.class);
-        server.serverChannelTransmitter().packetReceiverManager().registerPacketHandler(ServerPacket.class, ServerPacketReceiver.class);
-
+public class ServerPacketReceiver extends PacketReceiver<ServerPacket> {
+    @Override
+    public void receivePacket(ServerPacket packet, NetworkChannel networkChannel) {
+        System.out.println(packet.abstractServer().toString());
     }
 }

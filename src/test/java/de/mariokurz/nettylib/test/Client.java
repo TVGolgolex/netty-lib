@@ -31,6 +31,9 @@ import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.client.InactiveAction;
 import de.mariokurz.nettylib.network.client.NetworkClient;
+import de.mariokurz.nettylib.test.packet.Java;
+import de.mariokurz.nettylib.test.packet.Proxy;
+import de.mariokurz.nettylib.test.packet.ServerPacket;
 import de.mariokurz.nettylib.test.packet.TestRoutingPacket;
 
 import java.util.ArrayList;
@@ -51,12 +54,12 @@ public class Client {
 
         client.connect("0.0.0.0", 9985);
 
-/*        Scheduler.runtimeScheduler().schedule(() -> {
-            *//*client.networkChannel().sendPacket(new TestPacket("Hallo"*//**//*, new JsonDocument("Test", "Test")*//**//*));
-            System.out.println("test");*//*
+        Scheduler.runtimeScheduler().schedule(() -> {
+            /*client.networkChannel().sendPacket(new TestPacket("Hallo", new JsonDocument("Test", "Test")));
+            System.out.println("test");
 
-*//*            TestPacket result = client.networkChannel().sendQuery(new TestPacket("Test"));
-            System.out.println(result.message());*//*
+            TestPacket result = client.networkChannel().sendQuery(new TestPacket("Test"));
+            System.out.println(result.message());
 
             TestRoutingPacket testRoutingPacket = new TestRoutingPacket(StringUtils.generateRandomString(8),
                     UUID.randomUUID(), new ArrayList<>());
@@ -67,9 +70,12 @@ public class Client {
 
             var result = client.networkChannel().sendRoutedPacket(testRoutingPacket,
                     client.clientChannelTransmitter().getNetworkChannel("Test-2").channelIdentity());
-            System.out.println(result.name());
+            System.out.println(result.name());*/
 
-        }, 4000);*/
+            client.networkChannel().sendPacket(new ServerPacket(new Java()));
+            client.networkChannel().sendPacket(new ServerPacket(new Proxy()));
+
+        }, 4000);
 
     }
 }
