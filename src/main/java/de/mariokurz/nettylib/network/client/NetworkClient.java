@@ -26,6 +26,7 @@ package de.mariokurz.nettylib.network.client;
 
 import de.golgolex.quala.ConsoleColor;
 import de.golgolex.quala.scheduler.Scheduler;
+import de.mariokurz.nettylib.ConnectionState;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
@@ -61,6 +62,7 @@ public class NetworkClient implements AutoCloseable{
     protected final InactiveAction inactiveAction;
     protected final NetworkChannel networkChannel;
 
+    protected ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
     protected SslContext sslCtx;
     protected Bootstrap bootstrap;
 
@@ -137,7 +139,7 @@ public class NetworkClient implements AutoCloseable{
     }
 
     @Getter
-    public static class InitThread implements Runnable {
+    public class InitThread implements Runnable {
 
         private final Bootstrap bootstrap;
         private final String host;
@@ -157,8 +159,10 @@ public class NetworkClient implements AutoCloseable{
                 this.channel = bootstrap.connect(host, port)
                         .addListener(future -> {
                             if (future.isSuccess()) {
+                                NetworkClient.this.connectionState = ConnectionState.CONNECTED;
                                 NettyLib.log(Level.INFO, ConsoleColor.GREEN.ansiCode() + "Successfully connecting @" + host + ":" + port);
                             } else {
+                                NetworkClient.this.connectionState = ConnectionState.FAILED;
                                 NettyLib.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Failed while connecting @" + host + ":" + port);
                             }
                         })

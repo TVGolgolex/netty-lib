@@ -25,6 +25,7 @@ package de.mariokurz.nettylib.network.server;
  */
 
 import de.golgolex.quala.ConsoleColor;
+import de.mariokurz.nettylib.ConnectionState;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.utils.NettyUtils;
 import io.netty5.bootstrap.ServerBootstrap;
@@ -49,6 +50,7 @@ public class NetworkServer implements AutoCloseable{
     protected final EventLoopGroup workerEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final ServerChannelTransmitter serverChannelTransmitter;
 
+    protected ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
     protected ServerBootstrap serverBootstrap;
     protected SslContext sslCtx;
 
@@ -88,8 +90,10 @@ public class NetworkServer implements AutoCloseable{
                         port)
                 .addListener(future -> {
                     if (future.isSuccess()) {
+                        connectionState = ConnectionState.CONNECTED;
                         NettyLib.log(Level.INFO, ConsoleColor.GREEN.ansiCode() + "Opened network listener @" + hostName + ":" + port);
                     } else {
+                        connectionState = ConnectionState.FAILED;
                         NettyLib.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Failed while opening network listener @" + hostName + ":" + port);
                     }
                 });
