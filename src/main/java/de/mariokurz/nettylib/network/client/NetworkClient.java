@@ -60,7 +60,6 @@ public class NetworkClient implements AutoCloseable{
     protected final ClientChannelTransmitter clientChannelTransmitter;
     protected final ChannelIdentity channelIdentity;
     protected final InactiveAction inactiveAction;
-    protected final NetworkChannel networkChannel;
 
     protected ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
     protected SslContext sslCtx;
@@ -74,13 +73,6 @@ public class NetworkClient implements AutoCloseable{
         this.clientChannelTransmitter = new ClientChannelTransmitter(this);
         this.channelIdentity = channelIdentity;
         this.inactiveAction = inactiveAction;
-        this.networkChannel = new NetworkChannel(
-                this.channelIdentity,
-                this.queryPacketManager,
-                this.routingPacketManager,
-                null,
-                false
-        );
 
         if (ssl) {
             try {
@@ -90,6 +82,10 @@ public class NetworkClient implements AutoCloseable{
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public NetworkChannel thisNetworkChannel() {
+        return this.clientChannelTransmitter.getNetworkChannel(this.channelIdentity.uniqueId());
     }
 
     public void connect(
@@ -130,7 +126,7 @@ public class NetworkClient implements AutoCloseable{
     }
 
     public void enableStayActive() {
-        Scheduler.runtimeScheduler().schedule(() -> this.networkChannel.sendPacket(new NetworkChannelStayActivePacket(this.channelIdentity)), 60000, 60000);
+        Scheduler.runtimeScheduler().schedule(() -> this.thisNetworkChannel().sendPacket(new NetworkChannelStayActivePacket(this.channelIdentity)), 60000, 60000);
     }
 
     @Override

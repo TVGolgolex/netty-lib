@@ -35,7 +35,7 @@ public class TestPacketReceiver extends PacketReceiver<TestPacket> {
         System.out.println(packet.queryId());
         System.out.println(packet.message());
 //        System.out.println(packet.jsonDocument().toString());
-        respond(new TestPacket(packet.message()/*, packet.jsonDocument()*/), networkChannel);
+        respond(new TestPacket(packet.message(), packet.jsonDocument()), networkChannel);
     }
 
 }

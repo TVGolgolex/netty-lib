@@ -25,6 +25,7 @@ package de.mariokurz.nettylib.network.client;
  */
 
 import de.mariokurz.nettylib.NettyLib;
+import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthenticatedPacket;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthorizePacket;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInactivePacket;
@@ -72,8 +73,8 @@ public class NetworkClientHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        networkClient.networkChannel.channel(ctx.channel());
-        networkClient.networkChannel.sendPacket(new NetworkChannelAuthorizePacket(networkClient.networkChannel.channelIdentity()));
+        networkClient.clientChannelTransmitter.createNetworkChannel(networkClient.channelIdentity, ctx);
+        networkClient.thisNetworkChannel().sendPacket(new NetworkChannelAuthorizePacket(this.networkClient.channelIdentity));
     }
 
     @Override

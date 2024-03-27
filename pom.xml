@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.github.golgolex</groupId>
             <artifactId>quala</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.5</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

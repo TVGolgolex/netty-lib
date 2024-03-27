@@ -25,16 +25,14 @@ package de.mariokurz.nettylib.test;
  */
 
 import de.golgolex.quala.Quala;
+import de.golgolex.quala.json.document.JsonDocument;
 import de.golgolex.quala.scheduler.Scheduler;
 import de.golgolex.quala.utils.string.StringUtils;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.client.InactiveAction;
 import de.mariokurz.nettylib.network.client.NetworkClient;
-import de.mariokurz.nettylib.test.packet.Java;
-import de.mariokurz.nettylib.test.packet.Proxy;
-import de.mariokurz.nettylib.test.packet.ServerPacket;
-import de.mariokurz.nettylib.test.packet.TestRoutingPacket;
+import de.mariokurz.nettylib.test.packet.*;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -55,25 +53,27 @@ public class Client {
         client.connect("0.0.0.0", 9985);
 
         Scheduler.runtimeScheduler().schedule(() -> {
-            /*client.networkChannel().sendPacket(new TestPacket("Hallo", new JsonDocument("Test", "Test")));
+            client.thisNetworkChannel().sendPacket(new TestPacket("Hallo", new JsonDocument("Test", "Test")));
             System.out.println("test");
 
-            TestPacket result = client.networkChannel().sendQuery(new TestPacket("Test"));
+            TestPacket result = client.thisNetworkChannel().sendQuery(new TestPacket("Test", new JsonDocument("abc", "fick")));
             System.out.println(result.message());
 
-            TestRoutingPacket testRoutingPacket = new TestRoutingPacket(StringUtils.generateRandomString(8),
+            System.out.println(result.jsonDocument().readString("abc"));
+
+/*            TestRoutingPacket testRoutingPacket = new TestRoutingPacket(StringUtils.generateRandomString(8),
                     UUID.randomUUID(), new ArrayList<>());
 
             for (int i = 0; i < 25; i++) {
                 testRoutingPacket.strings().add(StringUtils.generateRandomString(Quala.randomNumber(3, 15)));
             }
 
-            var result = client.networkChannel().sendRoutedPacket(testRoutingPacket,
+            var resultd = client.networkChannel().sendRoutedPacket(testRoutingPacket,
                     client.clientChannelTransmitter().getNetworkChannel("Test-2").channelIdentity());
-            System.out.println(result.name());*/
+            System.out.println(resultd.name());*/
 
-            client.networkChannel().sendPacket(new ServerPacket(new Java()));
-            client.networkChannel().sendPacket(new ServerPacket(new Proxy()));
+/*            client.networkChannel().sendPacket(new ServerPacket(new Java()));
+            client.networkChannel().sendPacket(new ServerPacket(new Proxy()));*/
 
         }, 4000);
 

@@ -24,32 +24,16 @@ package de.mariokurz.nettylib.network.protocol;
  * SOFTWARE.
  */
 
-import com.google.gson.JsonObject;
-import de.golgolex.quala.json.JsonUtils;
 import de.golgolex.quala.json.document.JsonDocument;
-import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.protocol.routing.RoutingPacket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.logging.Level;
 
 @Getter
 @AllArgsConstructor
 public class JsonPacket extends RoutingPacket implements Serializable {
 
-    private final String json;
-
-    public JsonPacket(JsonDocument jsonDocument) {
-        this.json = JsonUtils.toJson(jsonDocument.jsonObject());
-    }
-
-    public JsonDocument jsonDocument() {
-        if (this.json == null) {
-            NettyLib.log(Level.SEVERE, this.getClass(), "No Json string provided");
-            return new JsonDocument();
-        }
-        return new JsonDocument(JsonUtils.fromJson(this.json, JsonObject.class));
-    }
+    private final JsonDocument jsonDocument;
 }
