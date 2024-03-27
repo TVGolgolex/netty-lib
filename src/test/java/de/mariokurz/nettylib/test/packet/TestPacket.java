@@ -62,12 +62,7 @@ public class TestPacket extends Packet implements Serializable {
      * @throws ClassNotFoundException If the class of the object cannot be found.
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // Read the JSON string from the input object stream
-        String jsonString = (String) in.readObject();
-        // Convert the JSON string back to a JsonObject
-        var jsonObject = JsonUtils.JSON.fromJson(jsonString, JsonObject.class);
-        // Set the JsonDocument object with the deserialized JsonObject
-        this.jsonDocument = new JsonDocument(jsonObject);
+        this.jsonDocument = JsonDocument.parseJson((String) in.readObject());
     }
 
 }
