@@ -53,6 +53,7 @@ public class QueryPacketManager {
      * @return                A CompletableFuture that will be completed with the response packet,
      *                        or null if no response is received within the specified time limit.
      */
+    @SuppressWarnings("unchecked")
     public <T extends Packet> CompletableFuture<T> sendQueryFuture(
             @NonNull Object packet,
             @NonNull NetworkChannel networkChannel
@@ -111,6 +112,7 @@ public class QueryPacketManager {
      * @return                The response packet, or null if no response is received within
      *                        the specified time limit.
      */
+    @SuppressWarnings("unchecked")
     public <T extends Packet> T sendQuery(
             @NonNull Object packet,
             @NonNull NetworkChannel networkChannel

@@ -3,7 +3,7 @@ package de.mariokurz.nettylib.test.packet;
 /*
  * MIT License
  *
- * Copyright (c) 2024 22:41 Mario Pascal K.
+ * Copyright (c) 2024 16:14 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,5 +26,5 @@ package de.mariokurz.nettylib.test.packet;
 
 import java.io.Serializable;
 
-public abstract class AbstractServer implements Serializable {
+public class FirstPacket extends AbstractPacket implements Serializable {
 }

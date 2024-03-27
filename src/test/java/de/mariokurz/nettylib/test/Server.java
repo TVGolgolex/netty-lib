@@ -27,8 +27,10 @@ package de.mariokurz.nettylib.test;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.channel.InactiveAction;
 import de.mariokurz.nettylib.network.server.NetworkServer;
+import de.mariokurz.nettylib.test.packet.AbstractPacket;
 import de.mariokurz.nettylib.test.packet.ServerPacket;
 import de.mariokurz.nettylib.test.packet.TestPacket;
+import de.mariokurz.nettylib.test.receiver.AbstractPacketReceiver;
 import de.mariokurz.nettylib.test.receiver.ServerPacketReceiver;
 import de.mariokurz.nettylib.test.receiver.TestPacketReceiver;
 
@@ -43,6 +45,7 @@ public class Server {
 
         server.serverChannelTransmitter().packetReceiverManager().registerPacketHandler(TestPacket.class, TestPacketReceiver.class);
         server.serverChannelTransmitter().packetReceiverManager().registerPacketHandler(ServerPacket.class, ServerPacketReceiver.class);
+        server.serverChannelTransmitter().packetReceiverManager().registerPacketHandler(AbstractPacket.class, AbstractPacketReceiver.class);
 
     }
 }

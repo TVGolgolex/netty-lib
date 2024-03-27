@@ -3,7 +3,7 @@ package de.mariokurz.nettylib.test.packet;
 /*
  * MIT License
  *
- * Copyright (c) 2024 22:41 Mario Pascal K.
+ * Copyright (c) 2024 16:13 Mario Pascal K.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,13 @@ package de.mariokurz.nettylib.test.packet;
  * SOFTWARE.
  */
 
+import de.mariokurz.nettylib.network.protocol.Packet;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.io.Serializable;
 
-public abstract class AbstractServer implements Serializable {
+@Getter
+@AllArgsConstructor
+public class AbstractPacket extends Packet implements Serializable {
 }
