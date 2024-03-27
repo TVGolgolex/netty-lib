@@ -26,11 +26,9 @@ package de.mariokurz.nettylib.test;
 
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
-import de.mariokurz.nettylib.network.client.InactiveAction;
+import de.mariokurz.nettylib.network.channel.InactiveAction;
 import de.mariokurz.nettylib.network.client.NetworkClient;
-import de.mariokurz.nettylib.test.packet.TestPacket;
 import de.mariokurz.nettylib.test.packet.TestRoutingPacket;
-import de.mariokurz.nettylib.test.receiver.TestPacketReceiver;
 import de.mariokurz.nettylib.test.receiver.TestRoutingReceiver;
 
 import java.util.UUID;
@@ -45,7 +43,7 @@ public class Client2 {
                         "Test-2",
                         UUID.randomUUID()
                 ),
-                InactiveAction.SHUTDOWN,
+                InactiveAction.RETRY,
                 false);
 
         client.connect("0.0.0.0", 9985);

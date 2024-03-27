@@ -24,6 +24,8 @@ package de.mariokurz.nettylib.network.client;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.ConsoleColor;
+import de.golgolex.quala.Quala;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthenticatedPacket;
@@ -42,6 +44,8 @@ import java.util.logging.Level;
 public class NetworkClientHandler extends SimpleChannelInboundHandler<Object> {
 
     private final NetworkClient networkClient;
+    private final String host;
+    private final int port;
 
     @Override
     protected void messageReceived(ChannelHandlerContext channelHandlerContext, Object o) throws Exception {
@@ -87,7 +91,9 @@ public class NetworkClientHandler extends SimpleChannelInboundHandler<Object> {
                     System.exit(0);
                 }
                 case RETRY -> {
-
+                    NettyLib.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Connection to {0}:{1} lost. The connection will be tried again in 3 seconds.", host, port);
+                    Quala.sleepUninterruptedly(3000);
+                    networkClient.connect(host, port);
                 }
             }
         }

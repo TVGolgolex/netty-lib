@@ -49,7 +49,7 @@ public class NetworkClientChannelInitializer extends ChannelInitializer<Channel>
 //                .addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()))
                 .addLast(new ObjectDecoder(ClassResolvers.softCachingResolver(NetworkClient.class.getClassLoader())))
                 .addLast(new ObjectEncoder())
-                .addLast(new NetworkClientHandler(networkClient));
+                .addLast(new NetworkClientHandler(networkClient, host, port));
 
     }
 }

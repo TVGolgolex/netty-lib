@@ -25,8 +25,10 @@ package de.mariokurz.nettylib.network.server;
  */
 
 import de.golgolex.quala.ConsoleColor;
+import de.golgolex.quala.Quala;
 import de.mariokurz.nettylib.ConnectionState;
 import de.mariokurz.nettylib.NettyLib;
+import de.mariokurz.nettylib.network.channel.InactiveAction;
 import de.mariokurz.nettylib.utils.NettyUtils;
 import io.netty5.bootstrap.ServerBootstrap;
 import io.netty5.channel.ChannelOption;
@@ -49,14 +51,17 @@ public class NetworkServer implements AutoCloseable{
     protected final EventLoopGroup bossEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final EventLoopGroup workerEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final ServerChannelTransmitter serverChannelTransmitter;
+    protected final InactiveAction inactiveAction;
 
     protected ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
     protected ServerBootstrap serverBootstrap;
     protected SslContext sslCtx;
 
     public NetworkServer(
-            boolean ssl
+            boolean ssl,
+            @NonNull InactiveAction inactiveAction
     ) {
+        this.inactiveAction = inactiveAction;
         this.serverChannelTransmitter = new ServerChannelTransmitter();
         if (ssl) {
             try {
@@ -91,14 +96,30 @@ public class NetworkServer implements AutoCloseable{
                 .addListener(future -> {
                     if (future.isSuccess()) {
                         connectionState = ConnectionState.CONNECTED;
-                        NettyLib.log(Level.INFO, ConsoleColor.GREEN.ansiCode() + "Opened network listener @" + hostName + ":" + port);
+                        NettyLib.log(Level.INFO, ConsoleColor.GREEN.ansiCode() + "Opened network channel @" + hostName + ":" + port);
                     } else {
                         connectionState = ConnectionState.FAILED;
-                        NettyLib.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Failed while opening network listener @" + hostName + ":" + port);
+                        NettyLib.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Failed while opening network channel @" + hostName + ":" + port);
                     }
                 });
 
         if (channelFuture.isFailed()) {
+            switch (inactiveAction) {
+                case SHUTDOWN -> {
+                    try {
+                        this.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.exit(0);
+                }
+                case RETRY -> {
+                    NettyLib.log(Level.INFO, ConsoleColor.RED.ansiCode() + "Opening a network channel is tried again in 3 seconds.",
+                            hostName, port);
+                    Quala.sleepUninterruptedly(3000);
+                    this.connect(hostName, port);
+                }
+            }
             return;
         }
 

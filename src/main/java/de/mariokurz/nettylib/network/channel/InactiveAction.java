@@ -1,4 +1,4 @@
-package de.mariokurz.nettylib.network.client;
+package de.mariokurz.nettylib.network.channel;
 
 /*
  * MIT License

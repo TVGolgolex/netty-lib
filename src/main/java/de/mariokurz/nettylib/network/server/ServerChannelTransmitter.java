@@ -233,7 +233,8 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
             // Check if the remote address of the network channel matches
             if (value.first().channel().remoteAddress().equals(ctx.channel().remoteAddress())) {
                 // Send a packet to all network channels indicating the channel is no longer authenticated
-                sendPacketToAll(new NetworkChannelInactivePacket(value.first().channelIdentity()), null);
+                sendPacketToAll(new NetworkChannelInactivePacket(value.first().channelIdentity()),
+                        networkChannels -> networkChannels.channelIdentity().equals(value.first().channelIdentity()));
                 // Set the network channel as inactive
                 value.first().inactive(true);
                 break;
@@ -269,6 +270,7 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
         sendPacketToAll(new NetworkChannelAuthenticatedPacket(networkChannelAuthorizePacket.channelIdentity()), null);
         // Send a network channel initialization packet to the newly authorized network channel
         networkChannel.sendPacket(new NetworkChannelInitPacket(this.getNetworkChannels().stream()
+                .filter(networkChannels -> !networkChannels.inactive())
                 .map(NetworkChannel::channelIdentity)
                 .toList()));
         // Add the authorized network channel to the authorized map

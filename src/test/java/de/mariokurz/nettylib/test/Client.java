@@ -24,17 +24,14 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
-import de.golgolex.quala.Quala;
 import de.golgolex.quala.json.document.JsonDocument;
 import de.golgolex.quala.scheduler.Scheduler;
-import de.golgolex.quala.utils.string.StringUtils;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
-import de.mariokurz.nettylib.network.client.InactiveAction;
+import de.mariokurz.nettylib.network.channel.InactiveAction;
 import de.mariokurz.nettylib.network.client.NetworkClient;
 import de.mariokurz.nettylib.test.packet.*;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class Client {
@@ -47,7 +44,7 @@ public class Client {
                         "Test-1",
                         UUID.randomUUID()
                 ),
-                InactiveAction.SHUTDOWN,
+                InactiveAction.RETRY,
                 false);
 
         client.connect("0.0.0.0", 9985);

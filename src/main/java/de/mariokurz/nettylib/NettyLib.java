@@ -34,13 +34,13 @@ public class NettyLib {
 
     public static final UUID SYSTEM_UUID = UUID.fromString("0f0f0f0f-0f0f-0f0f-f0f0-0f0f0f0f0f0f");
     public static boolean DEV_MODE = false;
-    private static final Logger logger = Logger.getLogger("Packery");
+    private static final Logger logger = Logger.getLogger("NettyLib");
     public static org.slf4j.Logger slf4jLogger;
 
     public static ConsoleColor errorConsoleColor = ConsoleColor.RED;
     public static ConsoleColor warnConsoleColor = ConsoleColor.ORANGE;
     public static ConsoleColor debugConsoleColor = ConsoleColor.YELLOW;
-    public static ConsoleColor normalConsoleColor = ConsoleColor.AQUA;
+    public static ConsoleColor normalConsoleColor = ConsoleColor.DEFAULT;
 
     public static void log(Level level, String var, Object... objects) {
         if (slf4jLogger != null) {

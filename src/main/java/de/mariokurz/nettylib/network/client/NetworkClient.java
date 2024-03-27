@@ -25,10 +25,12 @@ package de.mariokurz.nettylib.network.client;
  */
 
 import de.golgolex.quala.ConsoleColor;
+import de.golgolex.quala.Quala;
 import de.golgolex.quala.scheduler.Scheduler;
 import de.mariokurz.nettylib.ConnectionState;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
+import de.mariokurz.nettylib.network.channel.InactiveAction;
 import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelStayActivePacket;
 import de.mariokurz.nettylib.network.protocol.query.QueryPacketManager;
@@ -111,8 +113,25 @@ public class NetworkClient implements AutoCloseable{
             return;
         }
 
-        if (initThread.channel() == null) {
-            NettyLib.debug(Level.SEVERE, this.getClass(), ConsoleColor.RED.ansiCode() + "Channel is null");
+        if (connectionState == ConnectionState.FAILED) {
+
+            switch (inactiveAction) {
+                case SHUTDOWN -> {
+                    try {
+                        this.close();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.exit(0);
+                }
+                case RETRY -> {
+                    NettyLib.log(Level.INFO, ConsoleColor.RED.ansiCode() + "The connection will be tried again in 3 seconds.",
+                            hostName, port);
+                    Quala.sleepUninterruptedly(3000);
+                    this.connect(hostName, port);
+                }
+            }
+
             return;
         }
 
