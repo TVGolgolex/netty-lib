@@ -88,7 +88,7 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
             @NonNull Channel channel
     ) {
         for (var value : networkChannels.values()) {
-            if (value.channel().remoteAddress().equals(channel.remoteAddress())) {
+            if (value.channel().remoteAddress().equals(channel.remoteAddress()) && !value.inactive()) {
                 return value;
             }
         }
@@ -106,7 +106,7 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
             @NonNull String namespace
     ) {
         for (var value : networkChannels.values()) {
-            if (value.channelIdentity().namespace().equalsIgnoreCase(namespace)) {
+            if (value.channelIdentity().namespace().equalsIgnoreCase(namespace) && !value.inactive()) {
                 return value;
             }
         }
@@ -124,7 +124,7 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
             @NonNull UUID uniqueId
     ) {
         for (var value : networkChannels.values()) {
-            if (value.channelIdentity().uniqueId().equals(uniqueId)) {
+            if (value.channelIdentity().uniqueId().equals(uniqueId) && !value.inactive()) {
                 return value;
             }
         }
@@ -144,7 +144,7 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
         // Iterate through each authorized entry
         for (var value : networkChannels.values()) {
             // Check if the channelIdentity matches
-            if (value.channelIdentity().equals(channelIdentity)) {
+            if (value.channelIdentity().equals(channelIdentity) && !value.inactive()) {
                 // Return the associated network channel
                 return value;
             }

@@ -107,7 +107,7 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
         // Iterate through each authorized entry
         for (var value : authorized.values()) {
             // Check if the remote address of the channel matches
-            if (value.first().channel().remoteAddress().equals(channel.remoteAddress())) {
+            if (value.first().channel().remoteAddress().equals(channel.remoteAddress()) && !value.first().inactive()) {
                 // Return the associated network channel
                 return value.first();
             }
@@ -128,7 +128,7 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
         // Iterate through each authorized entry
         for (var value : authorized.values()) {
             // Check if the namespace matches
-            if (value.first().channelIdentity().namespace().equalsIgnoreCase(namespace)) {
+            if (value.first().channelIdentity().namespace().equalsIgnoreCase(namespace) && !value.first().inactive()) {
                 // Return the associated network channel
                 return value.first();
             }
@@ -149,7 +149,7 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
         // Iterate through each authorized entry
         for (var value : authorized.values()) {
             // Check if the unique ID matches
-            if (value.first().channelIdentity().uniqueId().equals(uniqueId)) {
+            if (value.first().channelIdentity().uniqueId().equals(uniqueId) && !value.first().inactive()) {
                 // Return the associated network channel
                 return value.first();
             }
@@ -170,7 +170,7 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
         // Iterate through each authorized entry
         for (var value : authorized.values()) {
             // Check if the channelIdentity matches
-            if (value.first().channelIdentity().equals(channelIdentity)) {
+            if (value.first().channelIdentity().equals(channelIdentity) && !value.first().inactive()) {
                 // Return the associated network channel
                 return value.first();
             }
