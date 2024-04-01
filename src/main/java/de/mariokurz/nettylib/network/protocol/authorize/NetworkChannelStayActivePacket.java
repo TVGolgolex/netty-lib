@@ -37,22 +37,8 @@ import java.io.Serializable;
 @Getter
 @AllArgsConstructor
 @PacketObjectSerial
-public class NetworkChannelStayActivePacket extends Packet implements Serializable, SelfBuild {
+public class NetworkChannelStayActivePacket extends Packet implements Serializable {
 
     private ChannelIdentity channelIdentity;
 
-    @Override
-    public int registerId() {
-        return -5;
-    }
-
-    @Override
-    public void writeBuffer(PacketBuffer packetBuffer) {
-        packetBuffer.writeString(channelIdentity.namespace()).writeUniqueId(channelIdentity.uniqueId());
-    }
-
-    @Override
-    public void readBuffer(PacketBuffer packetBuffer) {
-        this.channelIdentity = new ChannelIdentity(packetBuffer.readString(), packetBuffer.readUniqueId());
-    }
 }

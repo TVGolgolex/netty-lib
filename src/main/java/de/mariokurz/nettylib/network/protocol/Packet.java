@@ -36,7 +36,6 @@ import java.util.UUID;
 @PacketObjectSerial
 public class Packet implements Serializable {
 
-    @PacketObjectSerial
     private UUID queryId = null;
 
 }

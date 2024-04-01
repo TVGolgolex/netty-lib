@@ -37,7 +37,7 @@ import java.util.List;
 
 @Getter
 @PacketObjectSerial
-public class NetworkChannelInitPacket extends Packet implements Serializable, SelfBuild {
+public class NetworkChannelInitPacket extends Packet implements Serializable {
 
     private final List<ChannelIdentity> channelIdentities;
 
@@ -47,32 +47,5 @@ public class NetworkChannelInitPacket extends Packet implements Serializable, Se
 
     public NetworkChannelInitPacket() {
         this.channelIdentities = new ArrayList<>();
-    }
-
-    @Override
-    public int registerId() {
-        return -4;
-    }
-
-    @Override
-    public void writeBuffer(PacketBuffer packetBuffer) {
-        packetBuffer.writeInt(channelIdentities.size());
-        for (ChannelIdentity con : channelIdentities) {
-            packetBuffer.writeString(con.namespace())
-                    .writeUniqueId(con.uniqueId());
-        }
-    }
-
-    @Override
-    public void readBuffer(PacketBuffer packetBuffer) {
-        var amount = packetBuffer.readInt();
-        if (amount > 0) {
-            for (int i = 0; i < amount; i++) {
-                channelIdentities.add(new ChannelIdentity(
-                        packetBuffer.readString(),
-                        packetBuffer.readUniqueId()
-                ));
-            }
-        }
     }
 }

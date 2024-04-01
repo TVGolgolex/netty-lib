@@ -40,7 +40,7 @@ public class Server {
 
         NettyLib.DEV_MODE = true;
 
-        var server = new NetworkServer(false, InactiveAction.RETRY, Codec.DYNAMIC_SELF_OSGAN);
+        var server = new NetworkServer(false, InactiveAction.RETRY, Codec.DYNAMIC_SELF_NETTY);
 
         server.connect("0.0.0.0", 9985);
 

@@ -46,7 +46,7 @@ public class Client {
                         UUID.randomUUID()
                 ),
                 InactiveAction.RETRY,
-                Codec.DYNAMIC_SELF_OSGAN,
+                Codec.DYNAMIC_SELF_NETTY,
                 false);
 
         client.connect("0.0.0.0", 9985);

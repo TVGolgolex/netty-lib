@@ -25,8 +25,8 @@ package de.mariokurz.nettylib.network.protocol.codec.dynamic;
  */
 
 import de.mariokurz.nettylib.Codec;
+import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.protocol.Packet;
-import de.mariokurz.nettylib.network.protocol.codec.AbstractMessageCodec;
 import de.mariokurz.nettylib.network.protocol.codec.PacketBuffer;
 import de.mariokurz.nettylib.network.protocol.codec.nettyextras.serialization.ClassResolvers;
 import de.mariokurz.nettylib.network.protocol.codec.nettyextras.serialization.ObjectDecoder;
@@ -35,9 +35,14 @@ import de.mariokurz.nettylib.network.protocol.codec.osgan.OsganMessageCodec;
 import de.mariokurz.nettylib.network.protocol.codec.selfbuild.SelfBuild;
 import de.mariokurz.nettylib.network.protocol.codec.selfbuild.SelfBuildMessageCodec;
 import de.mariokurz.nettylib.network.protocol.register.PacketRegistry;
+import io.netty5.buffer.Buffer;
 import io.netty5.channel.ChannelHandlerContext;
+import io.netty5.handler.codec.ByteToMessageCodec;
 
-public class DynamicMessageCodec extends AbstractMessageCodec {
+import java.io.Serializable;
+import java.util.logging.Level;
+
+public class DynamicMessageCodec extends ByteToMessageCodec<Object> {
 
     private final Codec codec;
     private final SelfBuildMessageCodec selfBuildMessageCodec;
@@ -54,36 +59,63 @@ public class DynamicMessageCodec extends AbstractMessageCodec {
     }
 
     @Override
-    public void encode(ChannelHandlerContext ctx, Packet msg, PacketBuffer buffer) throws Exception {
-        if (msg instanceof SelfBuild) {
-            buffer.writeInt(1);
-            selfBuildMessageCodec.encode(ctx, msg, buffer);
-        } else {
-            switch (codec) {
-                case DYNAMIC_SELF_NETTY -> {
-                    buffer.writeInt(2);
-                    objectEncoder.actionEncode(ctx, msg, buffer.buffer());
+    protected void encode(ChannelHandlerContext ctx, Object o, Buffer out) throws Exception {
+        try {
+            if (o instanceof Packet msg) {
+                PacketBuffer buffer = new PacketBuffer(out);
+                if (msg instanceof SelfBuild) {
+                    buffer.writeInt(1);
+                    selfBuildMessageCodec.encode(ctx, msg, buffer);
+                    NettyLib.debug(Level.INFO, this.getClass(), "Using Encoder: " + selfBuildMessageCodec.getClass().getName());
+                } else {
+                    switch (codec) {
+                        case DYNAMIC_SELF_NETTY -> {
+                            buffer.writeInt(2);
+                            objectEncoder.actionEncode(ctx, msg, buffer.buffer());
+                            NettyLib.debug(Level.INFO, this.getClass(), "Using Encoder: " + objectEncoder.getClass().getName());
+                        }
+                        case DYNAMIC_SELF_OSGAN -> {
+                            buffer.writeInt(3);
+                            osganMessageCodec.encode(ctx, msg, buffer);
+                            NettyLib.debug(Level.INFO, this.getClass(), "Using Encoder: " + osganMessageCodec.getClass().getName());
+                        }
+                    }
                 }
-                case DYNAMIC_SELF_OSGAN -> {
-                    buffer.writeInt(3);
-                    osganMessageCodec.encode(ctx, msg, buffer);
-                }
+            } else {
+                 if (o instanceof Serializable serializable) {
+                     out.writeInt(2);
+                     objectEncoder.actionEncode(ctx, serializable, out);
+                     NettyLib.debug(Level.INFO, this.getClass(), "Using Encoder: " + objectEncoder.getClass().getName());
+                 } else {
+                     out.writeInt(-1);
+                     NettyLib.debug(Level.INFO, this.getClass(), "No decoder for: " + o.getClass().getName());
+                 }
             }
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
 
     @Override
-    public void decode(ChannelHandlerContext ctx, PacketBuffer buffer) throws Exception {
+    protected void decode(ChannelHandlerContext channelHandlerContext, Buffer buffer) throws Exception {
         var encoder = buffer.readInt();
 
         switch (encoder) {
-            case 1 -> selfBuildMessageCodec.decode(ctx, buffer);
-            case 2 -> {
-                var o = objectDecoder.actionDecode(ctx, buffer.buffer());
-                ctx.fireChannelRead(o);
+            case 1 -> {
+                selfBuildMessageCodec.decode(channelHandlerContext, new PacketBuffer(buffer));
+                NettyLib.debug(Level.INFO, this.getClass(), "Using Decode: " + selfBuildMessageCodec.getClass().getName());
             }
-            case 3 -> osganMessageCodec.decode(ctx, buffer);
+            case 2 -> {
+                var o = objectDecoder.actionDecode(channelHandlerContext, buffer);
+                channelHandlerContext.fireChannelRead(o);
+                NettyLib.debug(Level.INFO, this.getClass(), "Using Decode: " + objectDecoder.getClass().getName());
+            }
+            case 3 -> {
+                osganMessageCodec.decode(channelHandlerContext, new PacketBuffer(buffer));
+                NettyLib.debug(Level.INFO, this.getClass(), "Using Decode: " + osganMessageCodec.getClass().getName());
+            }
         }
-    }
 
+        buffer.resetOffsets();
+    }
 }
