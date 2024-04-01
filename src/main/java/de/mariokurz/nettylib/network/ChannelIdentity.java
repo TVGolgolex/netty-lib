@@ -1,5 +1,8 @@
 package de.mariokurz.nettylib.network;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -27,7 +30,12 @@ import java.util.UUID;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public record ChannelIdentity(String namespace, UUID uniqueId) implements Serializable {
+@Getter
+@AllArgsConstructor
+public class ChannelIdentity implements Serializable {
+
+    private String namespace;
+    private UUID uniqueId;
 
     public String toString() {
         return namespace + "#" + uniqueId;

@@ -25,6 +25,15 @@ package de.mariokurz.nettylib;
  */
 
 import de.golgolex.quala.ConsoleColor;
+import de.mariokurz.nettylib.network.client.NetworkClient;
+import de.mariokurz.nettylib.network.protocol.codec.dynamic.DynamicMessageCodec;
+import de.mariokurz.nettylib.network.protocol.codec.nettyextras.serialization.ClassResolvers;
+import de.mariokurz.nettylib.network.protocol.codec.nettyextras.serialization.ObjectDecoder;
+import de.mariokurz.nettylib.network.protocol.codec.nettyextras.serialization.ObjectEncoder;
+import de.mariokurz.nettylib.network.protocol.codec.selfbuild.SelfBuildMessageCodec;
+import de.mariokurz.nettylib.network.protocol.codec.osgan.OsganMessageCodec;
+import de.mariokurz.nettylib.network.protocol.register.PacketRegistry;
+import io.netty5.channel.Channel;
 
 import java.util.UUID;
 import java.util.logging.Level;
@@ -75,6 +84,17 @@ public class NettyLib {
             default -> {
                 return normalConsoleColor;
             }
+        }
+    }
+
+    public static void initChannelPipeline(Channel channel, Codec codec, PacketRegistry packetRegistry) {
+        switch (codec) {
+            case NETTY_EXTRAS -> channel.pipeline()
+                    .addLast(new ObjectDecoder(ClassResolvers.softCachingResolver(NetworkClient.class.getClassLoader())))
+                    .addLast(new ObjectEncoder());
+            case OSGAN -> channel.pipeline().addLast(new OsganMessageCodec());
+            case SELF_BUILD -> channel.pipeline().addLast(new SelfBuildMessageCodec(packetRegistry));
+            case DYNAMIC_SELF_NETTY, DYNAMIC_SELF_OSGAN -> channel.pipeline().addLast(new DynamicMessageCodec(codec, packetRegistry));
         }
     }
 

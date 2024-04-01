@@ -104,6 +104,41 @@
             <artifactId>netty-codec-extras</artifactId>
             <version>5.0.0.Alpha2</version>
         </dependency>
+
+        <!-- JBoss Marshalling dependency - completely optional -->
+        <dependency>
+            <groupId>org.jboss.marshalling</groupId>
+            <artifactId>jboss-marshalling</artifactId>
+            <version>2.0.12.Final</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Google Protocol Buffers - completely optional -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.19.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf.nano</groupId>
+            <artifactId>protobuf-javanano</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <!-- Test dependencies for jboss marshalling encoder/decoder -->
+        <dependency>
+            <groupId>org.jboss.marshalling</groupId>
+            <artifactId>jboss-marshalling-serial</artifactId>
+            <version>2.0.12.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.marshalling</groupId>
+            <artifactId>jboss-marshalling-river</artifactId>
+            <version>2.0.12.Final</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

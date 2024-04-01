@@ -26,6 +26,7 @@ package de.mariokurz.nettylib.network.server;
 
 import de.golgolex.quala.ConsoleColor;
 import de.golgolex.quala.Quala;
+import de.mariokurz.nettylib.Codec;
 import de.mariokurz.nettylib.ConnectionState;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.channel.InactiveAction;
@@ -52,6 +53,7 @@ public class NetworkServer implements AutoCloseable{
     protected final EventLoopGroup workerEventLoopGroup = new MultithreadEventLoopGroup(1, NettyUtils.createIoHandlerFactory());
     protected final ServerChannelTransmitter serverChannelTransmitter;
     protected final InactiveAction inactiveAction;
+    protected final Codec codec;
 
     protected ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
     protected ServerBootstrap serverBootstrap;
@@ -59,9 +61,11 @@ public class NetworkServer implements AutoCloseable{
 
     public NetworkServer(
             boolean ssl,
-            @NonNull InactiveAction inactiveAction
+            @NonNull InactiveAction inactiveAction,
+            @NonNull Codec codec
     ) {
         this.inactiveAction = inactiveAction;
+        this.codec = codec;
         this.serverChannelTransmitter = new ServerChannelTransmitter();
         if (ssl) {
             try {

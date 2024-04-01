@@ -24,6 +24,7 @@ package de.mariokurz.nettylib.network.protocol;
  * SOFTWARE.
  */
 
+import de.mariokurz.nettylib.network.protocol.codec.osgan.annotation.PacketObjectSerial;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,8 +33,10 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@PacketObjectSerial
 public class Packet implements Serializable {
 
+    @PacketObjectSerial
     private UUID queryId = null;
 
 }

@@ -24,9 +24,7 @@ package de.mariokurz.nettylib.network.client;
  * SOFTWARE.
  */
 
-import io.netty.contrib.handler.codec.serialization.ClassResolvers;
-import io.netty.contrib.handler.codec.serialization.ObjectDecoder;
-import io.netty.contrib.handler.codec.serialization.ObjectEncoder;
+import de.mariokurz.nettylib.NettyLib;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelInitializer;
 import lombok.AllArgsConstructor;
@@ -45,11 +43,8 @@ public class NetworkClientChannelInitializer extends ChannelInitializer<Channel>
             channel.pipeline().addLast(networkClient.sslCtx.newHandler(channel.bufferAllocator(), host, port));
         }
 
-        channel.pipeline()
-//                .addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()))
-                .addLast(new ObjectDecoder(ClassResolvers.softCachingResolver(NetworkClient.class.getClassLoader())))
-                .addLast(new ObjectEncoder())
-                .addLast(new NetworkClientHandler(networkClient, host, port));
+        NettyLib.initChannelPipeline(channel, networkClient.codec, networkClient.packetRegistry);
+        channel.pipeline().addLast(new NetworkClientHandler(networkClient, host, port));
 
     }
 }

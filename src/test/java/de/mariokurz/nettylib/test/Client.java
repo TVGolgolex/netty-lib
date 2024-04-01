@@ -26,6 +26,7 @@ package de.mariokurz.nettylib.test;
 
 import de.golgolex.quala.json.document.JsonDocument;
 import de.golgolex.quala.scheduler.Scheduler;
+import de.mariokurz.nettylib.Codec;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.channel.InactiveAction;
@@ -45,6 +46,7 @@ public class Client {
                         UUID.randomUUID()
                 ),
                 InactiveAction.RETRY,
+                Codec.DYNAMIC_SELF_OSGAN,
                 false);
 
         client.connect("0.0.0.0", 9985);
@@ -58,10 +60,10 @@ public class Client {
 
             System.out.println(result.jsonDocument().readString("abc"));
 
-            client.thisNetworkChannel().sendPacket(new FirstPacket());
+/*            client.thisNetworkChannel().sendPacket(new FirstPacket());
             client.thisNetworkChannel().sendPacket(new SecondPacket());
 
-/*            TestRoutingPacket testRoutingPacket = new TestRoutingPacket(StringUtils.generateRandomString(8),
+            TestRoutingPacket testRoutingPacket = new TestRoutingPacket(StringUtils.generateRandomString(8),
                     UUID.randomUUID(), new ArrayList<>());
 
             for (int i = 0; i < 25; i++) {
@@ -70,9 +72,9 @@ public class Client {
 
             var resultd = client.networkChannel().sendRoutedPacket(testRoutingPacket,
                     client.clientChannelTransmitter().getNetworkChannel("Test-2").channelIdentity());
-            System.out.println(resultd.name());*/
+            System.out.println(resultd.name());
 
-/*            client.networkChannel().sendPacket(new ServerPacket(new Java()));
+            client.networkChannel().sendPacket(new ServerPacket(new Java()));
             client.networkChannel().sendPacket(new ServerPacket(new Proxy()));*/
 
         }, 2000);

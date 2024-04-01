@@ -24,6 +24,7 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
+import de.mariokurz.nettylib.Codec;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.channel.InactiveAction;
@@ -44,6 +45,7 @@ public class Client2 {
                         UUID.randomUUID()
                 ),
                 InactiveAction.RETRY,
+                Codec.OSGAN,
                 false);
 
         client.connect("0.0.0.0", 9985);

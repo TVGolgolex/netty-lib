@@ -25,13 +25,16 @@ package de.mariokurz.nettylib.network.protocol.routing;
  */
 
 import de.mariokurz.nettylib.network.ChannelIdentity;
+import de.mariokurz.nettylib.network.protocol.codec.osgan.annotation.PacketObjectSerial;
 import de.mariokurz.nettylib.network.protocol.Packet;
 import lombok.Data;
 
 import java.io.Serializable;
 
 @Data
+@PacketObjectSerial
 public class RoutingPacket extends Packet
         implements Serializable {
+    @PacketObjectSerial
     private ChannelIdentity receiverIdentity;
 }

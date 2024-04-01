@@ -25,6 +25,7 @@ package de.mariokurz.nettylib.network.protocol;
  */
 
 import de.golgolex.quala.json.document.JsonDocument;
+import de.mariokurz.nettylib.network.protocol.codec.osgan.annotation.PacketObjectSerial;
 import de.mariokurz.nettylib.network.protocol.routing.RoutingPacket;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,7 +34,7 @@ import java.io.Serializable;
 
 @Getter
 @AllArgsConstructor
+@PacketObjectSerial
 public class JsonPacket extends RoutingPacket implements Serializable {
-
     private final JsonDocument jsonDocument;
 }

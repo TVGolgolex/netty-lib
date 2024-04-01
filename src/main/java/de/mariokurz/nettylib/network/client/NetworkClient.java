@@ -27,6 +27,7 @@ package de.mariokurz.nettylib.network.client;
 import de.golgolex.quala.ConsoleColor;
 import de.golgolex.quala.Quala;
 import de.golgolex.quala.scheduler.Scheduler;
+import de.mariokurz.nettylib.Codec;
 import de.mariokurz.nettylib.ConnectionState;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
@@ -35,6 +36,7 @@ import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelStayActivePacket;
 import de.mariokurz.nettylib.network.protocol.query.QueryPacketManager;
 import de.mariokurz.nettylib.network.protocol.receiver.PacketReceiverManager;
+import de.mariokurz.nettylib.network.protocol.register.PacketRegistry;
 import de.mariokurz.nettylib.network.protocol.routing.RoutingPacketManager;
 import de.mariokurz.nettylib.utils.NettyUtils;
 import io.netty5.bootstrap.Bootstrap;
@@ -59,9 +61,11 @@ public class NetworkClient implements AutoCloseable{
     protected final QueryPacketManager queryPacketManager = new QueryPacketManager();
     protected final RoutingPacketManager routingPacketManager = new RoutingPacketManager();
     protected final PacketReceiverManager packetReceiverManager = new PacketReceiverManager();
+    protected final PacketRegistry packetRegistry = new PacketRegistry();
     protected final ClientChannelTransmitter clientChannelTransmitter;
     protected final ChannelIdentity channelIdentity;
     protected final InactiveAction inactiveAction;
+    protected final Codec codec;
 
     protected ConnectionState connectionState = ConnectionState.NOT_CONNECTED;
     protected SslContext sslCtx;
@@ -70,8 +74,10 @@ public class NetworkClient implements AutoCloseable{
     public NetworkClient(
             @NonNull ChannelIdentity channelIdentity,
             @NonNull InactiveAction inactiveAction,
+            @NonNull Codec codec,
             boolean ssl
     ) {
+        this.codec = codec;
         this.clientChannelTransmitter = new ClientChannelTransmitter(this);
         this.channelIdentity = channelIdentity;
         this.inactiveAction = inactiveAction;

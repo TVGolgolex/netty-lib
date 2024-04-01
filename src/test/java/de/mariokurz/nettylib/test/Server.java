@@ -24,6 +24,7 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
+import de.mariokurz.nettylib.Codec;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.channel.InactiveAction;
 import de.mariokurz.nettylib.network.server.NetworkServer;
@@ -39,7 +40,7 @@ public class Server {
 
         NettyLib.DEV_MODE = true;
 
-        var server = new NetworkServer(false, InactiveAction.RETRY);
+        var server = new NetworkServer(false, InactiveAction.RETRY, Codec.DYNAMIC_SELF_OSGAN);
 
         server.connect("0.0.0.0", 9985);
 

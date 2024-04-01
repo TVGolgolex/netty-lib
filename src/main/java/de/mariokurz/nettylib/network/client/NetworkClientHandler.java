@@ -27,7 +27,6 @@ package de.mariokurz.nettylib.network.client;
 import de.golgolex.quala.ConsoleColor;
 import de.golgolex.quala.Quala;
 import de.mariokurz.nettylib.NettyLib;
-import de.mariokurz.nettylib.network.channel.NetworkChannel;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthenticatedPacket;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelAuthorizePacket;
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInactivePacket;
@@ -60,7 +59,7 @@ public class NetworkClientHandler extends SimpleChannelInboundHandler<Object> {
         }
 
         if (o instanceof NetworkChannelInitPacket packet) {
-            for (var channelIdentity : packet.connectedChannel()) {
+            for (var channelIdentity : packet.channelIdentities()) {
                 if (channelIdentity != null) {
                     networkClient.clientChannelTransmitter.createNetworkChannel(channelIdentity, channelHandlerContext);
                 }

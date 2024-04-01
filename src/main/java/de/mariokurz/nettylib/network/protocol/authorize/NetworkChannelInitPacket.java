@@ -25,8 +25,10 @@ package de.mariokurz.nettylib.network.protocol.authorize;
  */
 
 import de.mariokurz.nettylib.network.ChannelIdentity;
+import de.mariokurz.nettylib.network.protocol.codec.PacketBuffer;
+import de.mariokurz.nettylib.network.protocol.codec.osgan.annotation.PacketObjectSerial;
+import de.mariokurz.nettylib.network.protocol.codec.selfbuild.SelfBuild;
 import de.mariokurz.nettylib.network.protocol.Packet;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -34,14 +36,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class NetworkChannelInitPacket extends Packet implements Serializable {
-    private final List<ChannelIdentity> connectedChannel;
+@PacketObjectSerial
+public class NetworkChannelInitPacket extends Packet implements Serializable, SelfBuild {
 
-    public NetworkChannelInitPacket(List<ChannelIdentity> connectedChannel) {
-        this.connectedChannel = connectedChannel;
+    private final List<ChannelIdentity> channelIdentities;
+
+    public NetworkChannelInitPacket(List<ChannelIdentity> channelIdentities) {
+        this.channelIdentities = channelIdentities;
     }
 
     public NetworkChannelInitPacket() {
-        this.connectedChannel = new ArrayList<>();
+        this.channelIdentities = new ArrayList<>();
+    }
+
+    @Override
+    public int registerId() {
+        return -4;
+    }
+
+    @Override
+    public void writeBuffer(PacketBuffer packetBuffer) {
+        packetBuffer.writeInt(channelIdentities.size());
+        for (ChannelIdentity con : channelIdentities) {
+            packetBuffer.writeString(con.namespace())
+                    .writeUniqueId(con.uniqueId());
+        }
+    }
+
+    @Override
+    public void readBuffer(PacketBuffer packetBuffer) {
+        var amount = packetBuffer.readInt();
+        if (amount > 0) {
+            for (int i = 0; i < amount; i++) {
+                channelIdentities.add(new ChannelIdentity(
+                        packetBuffer.readString(),
+                        packetBuffer.readUniqueId()
+                ));
+            }
+        }
     }
 }

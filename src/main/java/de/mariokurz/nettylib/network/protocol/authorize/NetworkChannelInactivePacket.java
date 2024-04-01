@@ -25,6 +25,9 @@ package de.mariokurz.nettylib.network.protocol.authorize;
  */
 
 import de.mariokurz.nettylib.network.ChannelIdentity;
+import de.mariokurz.nettylib.network.protocol.codec.PacketBuffer;
+import de.mariokurz.nettylib.network.protocol.codec.osgan.annotation.PacketObjectSerial;
+import de.mariokurz.nettylib.network.protocol.codec.selfbuild.SelfBuild;
 import de.mariokurz.nettylib.network.protocol.Packet;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +36,22 @@ import java.io.Serializable;
 
 @Getter
 @AllArgsConstructor
-public class NetworkChannelInactivePacket extends Packet implements Serializable {
-    private final ChannelIdentity connectedChannel;
+@PacketObjectSerial
+public class NetworkChannelInactivePacket extends Packet implements Serializable, SelfBuild {
+    private ChannelIdentity channelIdentity;
+
+    @Override
+    public int registerId() {
+        return -3;
+    }
+
+    @Override
+    public void writeBuffer(PacketBuffer packetBuffer) {
+        packetBuffer.writeString(channelIdentity.namespace()).writeUniqueId(channelIdentity.uniqueId());
+    }
+
+    @Override
+    public void readBuffer(PacketBuffer packetBuffer) {
+        this.channelIdentity = new ChannelIdentity(packetBuffer.readString(), packetBuffer.readUniqueId());
+    }
 }

@@ -36,6 +36,7 @@ import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInactivePa
 import de.mariokurz.nettylib.network.protocol.authorize.NetworkChannelInitPacket;
 import de.mariokurz.nettylib.network.protocol.query.QueryPacketManager;
 import de.mariokurz.nettylib.network.protocol.receiver.PacketReceiverManager;
+import de.mariokurz.nettylib.network.protocol.register.PacketRegistry;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
 import lombok.Getter;
@@ -53,10 +54,11 @@ import java.util.logging.Level;
 @Getter
 public class ServerChannelTransmitter implements ChannelTransmitter {
 
-    private final PacketReceiverManager packetReceiverManager = new PacketReceiverManager();
-    private final QueryPacketManager queryPacketManager = new QueryPacketManager();
-    private final Map<SocketAddress, Channel> unauthorized = new HashMap<>();
-    private final Map<UUID, Pair<NetworkChannel, Long>> authorized = new HashMap<>();
+    protected final PacketReceiverManager packetReceiverManager = new PacketReceiverManager();
+    protected final QueryPacketManager queryPacketManager = new QueryPacketManager();
+    protected final PacketRegistry packetRegistry = new PacketRegistry();
+    protected final Map<SocketAddress, Channel> unauthorized = new HashMap<>();
+    protected final Map<UUID, Pair<NetworkChannel, Long>> authorized = new HashMap<>();
 
     /**
      * Send a packet to all authorized network channels except those that match the given predicate.
@@ -260,28 +262,28 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
         }
         // Create a new network channel with the provided channel identity and context
         var networkChannel = new NetworkChannel(
-                networkChannelAuthorizePacket.channelIdentity(),
+                networkChannelAuthorizePacket.connectedChannel(),
                 queryPacketManager,
                 null, // null argument to be filled later
                 ctx.channel(),
                 false
         );
         // Send an authentication packet to all network channels
-        sendPacketToAll(new NetworkChannelAuthenticatedPacket(networkChannelAuthorizePacket.channelIdentity()), null);
+        sendPacketToAll(new NetworkChannelAuthenticatedPacket(networkChannelAuthorizePacket.connectedChannel()), null);
         // Send a network channel initialization packet to the newly authorized network channel
         networkChannel.sendPacket(new NetworkChannelInitPacket(this.getNetworkChannels().stream()
                 .filter(networkChannels -> !networkChannels.inactive())
                 .map(NetworkChannel::channelIdentity)
                 .toList()));
         // Add the authorized network channel to the authorized map
-        authorized.put(networkChannelAuthorizePacket.channelIdentity().uniqueId(), new Pair<>(networkChannel,
+        authorized.put(networkChannelAuthorizePacket.connectedChannel().uniqueId(), new Pair<>(networkChannel,
                 System.currentTimeMillis()
         ));
         // Log the successful authorization of the network channel
         NettyLib.debug(Level.INFO, this.getClass(), "Authorized Channel: "
                 + ctx.channel().remoteAddress() + " - "
-                + networkChannelAuthorizePacket.channelIdentity().namespace() + ":"
-                + networkChannelAuthorizePacket.channelIdentity().uniqueId());
+                + networkChannelAuthorizePacket.connectedChannel().namespace() + ":"
+                + networkChannelAuthorizePacket.connectedChannel().uniqueId());
     }
 
 }
