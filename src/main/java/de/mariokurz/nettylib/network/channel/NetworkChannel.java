@@ -195,8 +195,8 @@ public class NetworkChannel {
     ) {
         // Trigger a packet send event before writing the packet to the channel
         EventManager.call(new NetworkChannelPacketSendEvent(this, packet));
-        // Debug
-        NettyLib.debug(Level.INFO, this.getClass(), "Write Packet: " + packet.getClass().getSimpleName() + ": Flush: " + flushAfter);
+        // Debug +
+        NettyLib.debug(Level.INFO, this.getClass(), "Write Packet: " + packet.getClass().getSimpleName() + ": Flush: " + flushAfter + " to Channel: " + this.channelIdentity);
         // Write the packet to the channel and return the write operation's Future
         return flushAfter ? this.channel.writeAndFlush(packet) : this.channel.write(packet);
     }

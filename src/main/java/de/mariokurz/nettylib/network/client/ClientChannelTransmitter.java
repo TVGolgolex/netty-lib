@@ -60,7 +60,7 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
             @Nullable Predicate<NetworkChannel> ifNot
     ) {
         networkChannels.forEach((uuid, networkChannel) -> {
-            if (ifNot != null && !ifNot.test(networkChannel) || networkChannel.inactive()) {
+            if (ifNot != null && ifNot.test(networkChannel) || networkChannel.inactive()) {
                 return;
             }
             networkChannel.sendPacket(packet);
@@ -199,10 +199,11 @@ public class ClientChannelTransmitter implements ChannelTransmitter {
      * @param channelHandlerContext The context of the channel to be removed.
      */
     public void removeNetworkChannel(
+            @NonNull ChannelIdentity channelIdentity,
             @NonNull ChannelHandlerContext channelHandlerContext
     ) {
         // Retrieves the network channel associated with the given context
-        var networkChannel = this.getNetworkChannel(channelHandlerContext.channel());
+        var networkChannel = this.getNetworkChannel(channelIdentity);
         // Checks if a network channel was found
         if (networkChannel == null) {
             // Logs a warning if no network channel was found

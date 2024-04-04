@@ -75,7 +75,7 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
         authorized.forEach((uuid, networkChannelLongPair) -> {
             // Check if a predicate is provided and the network channel does not match the predicate,
             // or if the network channel is inactive
-            if (ifNot != null && !ifNot.test(networkChannelLongPair.first()) || networkChannelLongPair.first().inactive()) {
+            if (ifNot != null && ifNot.test(networkChannelLongPair.first()) || networkChannelLongPair.first().inactive()) {
                 return; // Skip sending the packet to this network channel
             }
             // Send the packet to the network channel
@@ -239,6 +239,9 @@ public class ServerChannelTransmitter implements ChannelTransmitter {
                         networkChannels -> networkChannels.channelIdentity().equals(value.first().channelIdentity()));
                 // Set the network channel as inactive
                 value.first().inactive(true);
+                // Remove the channel from the active ones
+//                this.authorized.remove(value.first().channelIdentity().uniqueId());
+                NettyLib.log(Level.INFO, this.getClass(), "Disabled NetworkChannel: " + value.first().channelIdentity());
                 break;
             }
         }

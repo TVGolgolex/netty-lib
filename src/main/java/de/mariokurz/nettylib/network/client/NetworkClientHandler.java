@@ -54,8 +54,8 @@ public class NetworkClientHandler extends SimpleChannelInboundHandler<Object> {
             networkClient.clientChannelTransmitter.createNetworkChannel(packet.connectedChannel(), channelHandlerContext);
         }
 
-        if (o instanceof NetworkChannelInactivePacket) {
-            networkClient.clientChannelTransmitter.removeNetworkChannel(channelHandlerContext);
+        if (o instanceof NetworkChannelInactivePacket packet) {
+            networkClient.clientChannelTransmitter.removeNetworkChannel(packet.channelIdentity(), channelHandlerContext);
         }
 
         if (o instanceof NetworkChannelInitPacket packet) {

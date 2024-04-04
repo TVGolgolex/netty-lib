@@ -24,13 +24,14 @@ package de.mariokurz.nettylib.test;
  * SOFTWARE.
  */
 
+import de.golgolex.quala.json.document.JsonDocument;
+import de.golgolex.quala.scheduler.Scheduler;
 import de.mariokurz.nettylib.Codec;
 import de.mariokurz.nettylib.NettyLib;
 import de.mariokurz.nettylib.network.ChannelIdentity;
 import de.mariokurz.nettylib.network.channel.InactiveAction;
 import de.mariokurz.nettylib.network.client.NetworkClient;
-import de.mariokurz.nettylib.test.packet.TestRoutingPacket;
-import de.mariokurz.nettylib.test.receiver.TestRoutingReceiver;
+import de.mariokurz.nettylib.test.packet.TestPacket;
 
 import java.util.UUID;
 
@@ -45,12 +46,38 @@ public class Client2 {
                         UUID.randomUUID()
                 ),
                 InactiveAction.RETRY,
-                Codec.OSGAN,
+                Codec.DYNAMIC_SELF_NETTY,
                 false);
 
         client.connect("0.0.0.0", 9985);
 
-        client.packetReceiverManager().registerPacketHandler(TestRoutingPacket.class, TestRoutingReceiver.class);
+        Scheduler.runtimeScheduler().schedule(() -> {
+            client.thisNetworkChannel().sendPacket(new TestPacket("Hallo", new JsonDocument("Test", "Test")));
+            System.out.println("test");
+
+            TestPacket result = client.thisNetworkChannel().sendQuery(new TestPacket("Test", new JsonDocument("abc", "fick")));
+            System.out.println(result.message());
+
+            System.out.println(result.jsonDocument().readString("abc"));
+
+/*            client.thisNetworkChannel().sendPacket(new FirstPacket());
+            client.thisNetworkChannel().sendPacket(new SecondPacket());
+
+            TestRoutingPacket testRoutingPacket = new TestRoutingPacket(StringUtils.generateRandomString(8),
+                    UUID.randomUUID(), new ArrayList<>());
+
+            for (int i = 0; i < 25; i++) {
+                testRoutingPacket.strings().add(StringUtils.generateRandomString(Quala.randomNumber(3, 15)));
+            }
+
+            var resultd = client.networkChannel().sendRoutedPacket(testRoutingPacket,
+                    client.clientChannelTransmitter().getNetworkChannel("Test-2").channelIdentity());
+            System.out.println(resultd.name());
+
+            client.networkChannel().sendPacket(new ServerPacket(new Java()));
+            client.networkChannel().sendPacket(new ServerPacket(new Proxy()));*/
+
+        }, 2000);
 
     }
 }
