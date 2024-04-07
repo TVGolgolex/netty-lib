@@ -102,16 +102,25 @@ public class DynamicMessageCodec extends ByteToMessageCodec<Object> {
 
         switch (encoder) {
             case 1 -> {
-                selfBuildMessageCodec.decode(channelHandlerContext, new PacketBuffer(buffer));
+                selfBuildMessageCodec.decode(
+                        channelHandlerContext,
+                        new PacketBuffer(buffer)
+                );
                 NettyLib.debug(Level.INFO, this.getClass(), "Using Decode: " + selfBuildMessageCodec.getClass().getName());
             }
             case 2 -> {
-                var o = objectDecoder.actionDecode(channelHandlerContext, buffer);
+                var o = objectDecoder.actionDecode(
+                        channelHandlerContext,
+                        buffer
+                );
                 channelHandlerContext.fireChannelRead(o);
                 NettyLib.debug(Level.INFO, this.getClass(), "Using Decode: " + objectDecoder.getClass().getName());
             }
             case 3 -> {
-                osganMessageCodec.decode(channelHandlerContext, new PacketBuffer(buffer));
+                osganMessageCodec.decode(
+                        channelHandlerContext,
+                        new PacketBuffer(buffer)
+                );
                 NettyLib.debug(Level.INFO, this.getClass(), "Using Decode: " + osganMessageCodec.getClass().getName());
             }
         }
